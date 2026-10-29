@@ -1,0 +1,56 @@
+rules_version = '2';
+// Reglas de seguridad de Firestore · Inspección de Servicio (GlobalClean)
+// Publicar en: Consola de Firebase → Firestore Database → Reglas → pegar todo este texto → Publicar.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Administradores iniciales (deben coincidir con GC_ADMIN_EMAILS de firebase-config.js)
+    function ADMIN_EMAILS() { return ['ed.verdugo.penaloza@gmail.com']; }
+
+    function signedIn() {
+      return request.auth != null && request.auth.token.email != null
+        && (request.auth.token.email_verified == true
+            || request.auth.token.firebase.sign_in_provider == 'google.com');
+    }
+    function email() { return request.auth.token.email.lower(); }
+    function listed() { return exists(/databases/$(database)/documents/usuarios/$(email())); }
+    function isAdmin() {
+      return signedIn() && (email() in ADMIN_EMAILS()
+        || (listed() && get(/databases/$(database)/documents/usuarios/$(email())).data.rol == 'admin'));
+    }
+    function isUser() { return signedIn() && (email() in ADMIN_EMAILS() || listed()); }
+
+    // Lista de accesos: cada usuario lee su propia ficha; solo administradores la modifican
+    match /usuarios/{mail} {
+      allow read: if signedIn() && (mail == email() || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // Actas de inspección y sus fotografías
+    match /visitas/{id} {
+      allow read, create, update: if isUser();
+      allow delete: if isAdmin() || (isUser() && resource.data.by == request.auth.uid);
+    }
+    match /fotos/{id} {
+      allow read, write: if isUser();
+    }
+
+    // Maestros: centros, supervisores y configuración (marca, privacidad)
+    match /clientes/{id}     { allow read: if isUser(); allow write: if isAdmin(); }
+    match /supervisores/{id} { allow read: if isUser(); allow write: if isAdmin(); }
+    match /config/{id}       { allow read: if isUser(); allow write: if isAdmin(); }
+
+    // Ley 21.719: solicitudes de derechos y brechas (gestión del administrador)
+    match /solicitudes/{id} { allow create: if isUser(); allow read, update, delete: if isAdmin(); }
+    match /brechas/{id}     { allow create: if isUser(); allow read, update, delete: if isAdmin(); }
+
+    // Registro de accesos: cada usuario escribe solo su propio registro; el administrador lo revisa y depura
+    match /accesos/{uid} {
+      allow read: if isAdmin();
+      allow write: if (isUser() && uid == request.auth.uid) || isAdmin();
+    }
+
+    // Todo lo demás, cerrado
+    match /{path=**} { allow read, write: if false; }
+  }
+}
