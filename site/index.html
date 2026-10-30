@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="robots" content="noindex"><script src="firebase-config.js"></script><script src="gc-firebase-adapter.js"></script><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta name="gc-entorno" content="IS-Web"><script src="firebase-config.js"></script><script src="gc-firebase-adapter.js"></script><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <!--gc-tema:ini-->
 <style id="gc-tema-css">
 /* GlobalClean SST · Selector de tema */
@@ -1230,7 +1230,7 @@ function homeRender(){const cer=V.filter(v=>v.est=='cerrada'),m=today().slice(0,
 /* ---------- Formulario ---------- */
 let CUR=null,FILT='ALL',dirty=false;
 function blank(){return{id:uid(),folio:'',est:'borrador',fec:today(),hor:nowT(),cli:'',ins:'',sec:'',con:'',cca:'',tip:'Supervisión de rutina',tur:'Mañana',sup:'',rut:'',pre:'',pro:'',items:baseItems(),obs:'',cmp:[],fotos:[],fs:'',fc:'',nf:false,nfm:'',log:[]}}
-function folioFor(c){const d=(c.fec||today()).replace(/-/g,'').slice(2,6);return'SUP-'+d+'-'+c.id.slice(-4).toUpperCase()}
+function folioFor(c){const d=(c.fec||today()).replace(/-/g,'').slice(2,6);return(Cl.admin?'ADM-':'SUP-')+d+'-'+c.id.slice(-4).toUpperCase()}
 function startNew(){const ld=lsGet(LK.d,null);
  const fresh=()=>{newForm();go('form')};
  if(CUR&&dirty){ask('Inspección en curso','Tiene una inspección con cambios sin guardar. ¿Desea descartarla y comenzar una nueva?',fresh,'Descartar y comenzar',true);return}
