@@ -1,4 +1,37 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta name="gc-entorno" content="IS-Web"><script src="firebase-config.js"></script><script src="gc-firebase-adapter.js"></script><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta name="gc-entorno" content="IS-Web"><script src="firebase-config.js"></script><script src="gc-firebase-adapter.js"></script><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+/* ---------- Programa de visitas ---------- */
+.pg-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.pg-bar .f{flex:0 1 220px}
+.pcal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.pcal .dh{font-family:var(--font-display);font-weight:600;font-size:.78rem;color:var(--muted);text-align:center;text-transform:uppercase;letter-spacing:.04em;padding:2px 0}
+.pcd{min-height:92px;border:1px solid var(--line);border-radius:8px;padding:4px 5px;background:var(--surface);cursor:pointer;display:flex;flex-direction:column;gap:3px;min-width:0}
+.pcd:hover{border-color:var(--teal)}
+.pcd.o{background:transparent;border-style:dashed;opacity:.5;cursor:default}
+.pcd.we{background:var(--surface-2)}
+.pcd.t{border-color:var(--teal);box-shadow:inset 0 0 0 1px var(--teal)}
+.pcd .dn{font-size:.78rem;font-weight:700;color:var(--muted)}
+.pcd.t .dn{color:var(--teal-ink)}
+.pch{font-size:.72rem;line-height:1.25;padding:2px 5px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:0;width:100%;text-align:left;cursor:pointer;font-family:inherit}
+.ps-programada{background:var(--info-bg);color:var(--info-fg)}
+.ps-realizada{background:var(--tol-bg);color:var(--tol-fg)}
+.ps-cancelada{background:var(--na-bg);color:var(--na-fg);text-decoration:line-through}
+.ps-atrasada{background:var(--int-bg);color:var(--int-fg)}
+.pgag{display:flex;flex-direction:column;gap:10px}
+.pgday h4{margin:0 0 6px;font-size:.9rem;color:var(--muted);font-family:var(--font-display);text-transform:capitalize}
+.pgit{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:var(--radius-md);padding:8px 10px;background:var(--surface);cursor:pointer}
+.pgit:hover{border-color:var(--teal)}
+.pgit .hr{font-family:var(--font-mono);font-size:.85rem;min-width:46px}
+.pgit .bd2{flex:1;min-width:0}
+.pgit .bd2 b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pgn{border-left:4px solid var(--teal);background:var(--info-bg);color:var(--info-fg);border-radius:var(--radius-md);padding:10px 12px;display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.pgn b{color:var(--ink)}
+.pgn .tx{flex:1;min-width:220px}
+.pgform{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.pgform .full{grid-column:1/-1}
+.pgw{font-size:.85rem}
+.pglog{font-size:.82rem;color:var(--muted);display:flex;flex-direction:column;gap:3px;max-height:140px;overflow:auto}
+@media (max-width:760px){.pcd{min-height:58px}.pch .tn{display:none}.pgform{grid-template-columns:minmax(0,1fr)}}
+</style></head><body>
 <!--gc-tema:ini-->
 <style id="gc-tema-css">
 /* GlobalClean SST · Selector de tema */
@@ -682,6 +715,7 @@ select.est{width:auto;font-weight:600;font-size:.82rem;border-radius:var(--radiu
     <nav class="gc-nav" id="nav" aria-label="Secciones">
       <button data-v="home" class="on" aria-current="page">Inicio</button>
       <button data-v="form">Inspección</button>
+      <button data-v="prog">Programa <span class="nb" id="nbG" hidden>0</span></button>
       <button data-v="hist">Historial <span class="nb" id="nbH">0</span></button>
       <button data-v="comp">Compromisos <span class="nb" id="nbC" hidden>0</span></button>
       <button data-v="dash">Indicadores</button>
@@ -704,6 +738,13 @@ select.est{width:auto;font-weight:600;font-size:.82rem;border-radius:var(--radiu
   </div>
   <div id="alerts" class="view" style="gap:8px"></div>
   <div class="k" id="homeK"></div>
+  <div class="ch" style="margin:4px 2px -4px"><h2 style="margin:0">Resumen de indicadores</h2><span class="sm mu" id="hsPer"></span><button class="lk" data-go="dash" style="margin-left:auto">Ver todos los indicadores <i class="fa-solid fa-arrow-right"></i></button></div>
+  <div class="cg">
+    <div class="card"><div class="ch"><h2>Distribución de calificaciones</h2></div><div id="hsDist"></div></div>
+    <div class="card"><div class="ch"><h2>Cumplimiento mensual</h2><span class="sm mu">Últimos 6 meses</span></div><div id="hsMon"></div></div>
+    <div class="card"><div class="ch"><h2>Instalaciones con menor cumplimiento</h2></div><div id="hsIns"></div></div>
+    <div class="card"><div class="ch"><h2>Puntos más incumplidos</h2></div><div id="hsTop"></div></div>
+  </div>
   <div class="card">
     <div class="ch"><h2>Últimas inspecciones</h2><button class="lk" data-go="hist">Ver historial completo <i class="fa-solid fa-arrow-right"></i></button></div>
     <div id="recent"></div>
@@ -878,6 +919,35 @@ select.est{width:auto;font-weight:600;font-size:.82rem;border-radius:var(--radiu
   <div class="card"><div class="ch"><h2>Puntos con más incumplimientos</h2></div><div id="dTop"></div></div>
 </section>
 
+<!-- ============ PROGRAMA DE VISITAS ============ -->
+<section class="view" id="v-prog" hidden>
+  <div class="hero">
+    <div>
+      <div class="gc-eyebrow">Planificación de terreno</div><h1 class="hh">Programa de visitas</h1>
+      <div class="hs2">Agende las visitas a sus centros asignados, reciba recordatorios en el calendario del celular y vea los cambios que haga el administrador. Al finalizar el acta de un centro programado, la visita se marca como realizada.</div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="big ghost" id="pgGen"><i class="fa-solid fa-wand-magic-sparkles"></i>Programa sugerido</button><button class="big" id="pgNew"><i class="fa-solid fa-calendar-plus"></i>Nueva visita</button></div>
+  </div>
+  <div id="pgTop" class="view" style="gap:8px"></div>
+  <div class="card">
+    <div class="pg-bar">
+      <label class="f" id="pgSupL">Supervisor<select id="pgSup" class="inp"></select></label>
+      <label class="f">Mes<input id="pgMes" type="month" class="inp"></label>
+      <div class="row" style="gap:6px;margin-left:auto;flex-wrap:wrap">
+        <button class="btn s" id="pgPrev" title="Mes anterior">‹</button><button class="btn s" id="pgHoy">Hoy</button><button class="btn s" id="pgNext" title="Mes siguiente">›</button>
+        <button class="btn s" id="pgIcs"><i class="fa-solid fa-download"></i>Calendario (.ics)</button>
+        <button class="btn s" id="pgNotif"><i class="fa-solid fa-inbox"></i>Avisos del navegador</button>
+      </div>
+    </div>
+  </div>
+  <div class="k" id="pgK"></div>
+  <div class="cg">
+    <div class="card"><div class="ch"><h2 id="pgCalT">Calendario</h2><span class="sm mu">Toque un día para agendar</span></div><div id="pgCal"></div></div>
+    <div class="card"><div class="ch"><h2>Agenda del mes</h2></div><div id="pgList"></div></div>
+  </div>
+  <div class="card"><div class="ch"><h2 id="pgCenT">Centros asignados</h2><span class="sm mu" id="pgCenI"></span></div><div id="pgCen"></div></div>
+</section>
+
 <!-- ============ DATOS PERSONALES ============ -->
 <section class="view dp" id="v-dp" hidden>
   <div class="card">
@@ -962,14 +1032,14 @@ select.est{width:auto;font-weight:600;font-size:.82rem;border-radius:var(--radiu
     </div>
     <div class="card">
       <h2>Supervisores</h2>
-      <div class="row adm"><label class="f">Nombre<input id="sN" class="inp"></label><label class="f">RUT<input id="sR" class="inp" placeholder="12.345.678-5"></label><button class="btn s n" id="sA"><i class="fa-solid fa-plus"></i>Agregar</button></div>
+      <div class="row adm"><label class="f">Nombre<input id="sN" class="inp"></label><label class="f">RUT<input id="sR" class="inp" placeholder="12.345.678-5"></label><label class="f">Correo<input id="sM" class="inp" type="email" placeholder="supervisor@empresa.cl"></label><button class="btn s n" id="sA"><i class="fa-solid fa-plus"></i>Agregar</button></div>
       <div class="lst" id="sL"></div>
     </div>
     <div class="card">
       <div class="ch" style="margin:0;flex-wrap:wrap;gap:8px"><h2>Clientes e instalaciones</h2><span class="gc-tag" id="kN0">0 centros</span><span id="ordC" style="margin-left:auto"></span></div>
       <div class="adm" style="display:flex;flex-direction:column;gap:8px;border:1px dashed var(--line-strong);border-radius:var(--radius-md);padding:10px 12px;background:var(--surface-2)">
         <div class="row"><label class="btn p s" for="kImpF" style="flex:0 0 auto"><i class="fa-solid fa-file-import"></i>Cargar planilla de centros</label><input type="file" id="kImpF" accept=".xlsx,.xlsm,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" hidden><button type="button" class="btn s" id="kTpl" style="flex:0 0 auto"><i class="fa-solid fa-download"></i>Descargar plantilla</button></div>
-        <span class="cfgsub">Planilla maestra de centros GlobalClean (.xlsx, hoja «Centros», o .csv). Se leen Código, Centro de Trabajo, Cliente, Dotación, Administrador / Encargado y Cargo del encargado. Antes de guardar se muestra un resumen de centros nuevos, actualizados y filas omitidas. «Descargar plantilla» entrega la planilla maestra completa (42 columnas, listas desplegables e instrucciones).</span>
+        <span class="cfgsub">Planilla maestra de centros GlobalClean (.xlsx, hoja «Centros», o .csv). Se leen Código, Centro de Trabajo, Cliente, Dotación, Administrador / Encargado, Cargo del encargado, Supervisor/a de Terreno y Correo supervisor (estas dos asignan cada centro a su supervisor). Antes de guardar se muestra un resumen de centros nuevos, actualizados y filas omitidas. «Descargar plantilla» entrega la planilla maestra completa (42 columnas, listas desplegables e instrucciones).</span>
       </div>
       <div class="row adm"><label class="f" style="flex:0 1 120px">Código<input id="kK" class="inp" placeholder="GC-014"></label><label class="f">Cliente<input id="kC" class="inp" list="dl_cli"></label><label class="f">Instalación<input id="kI" class="inp"></label><label class="f" style="flex:0 1 110px">Dotación<input id="kD" class="inp" type="number" min="0" step="1"></label></div>
       <div class="row adm"><label class="f">Contacto<input id="kN" class="inp"></label><label class="f">Cargo<input id="kG" class="inp"></label><button class="btn s n" id="kA"><i class="fa-solid fa-plus"></i>Agregar</button></div>
@@ -1125,16 +1195,16 @@ const avgOf=a=>a.length?Math.round(a.reduce((x,y)=>x+y,0)/a.length):null;
 const pctCol=p=>`var(--${pctLv(p)}-solid)`;
 
 /* ---------- Almacenamiento ---------- */
-const LK={v:'supaseo_v3_visitas',f:'supaseo_v3_fotos',k:'supaseo_v3_clientes',s:'supaseo_v3_sup',b:'supaseo_v3_brand',d:'supaseo_v3_draft',a:'supaseo_v3_arcop',b2:'supaseo_v3_brechas',l:'supaseo_v3_accesos',p:'supaseo_v3_priv'};
-let V=[],K=[],S=[],BR={},FOTOS={},ARC=[],BRE=[],ACC=[],PR={};const NAMES={};
+const LK={v:'supaseo_v3_visitas',f:'supaseo_v3_fotos',k:'supaseo_v3_clientes',s:'supaseo_v3_sup',b:'supaseo_v3_brand',d:'supaseo_v3_draft',a:'supaseo_v3_arcop',b2:'supaseo_v3_brechas',l:'supaseo_v3_accesos',p:'supaseo_v3_priv',pv:'supaseo_v3_programa'};
+let V=[],K=[],S=[],BR={},FOTOS={},ARC=[],BRE=[],ACC=[],PR={},PRG=[];const NAMES={};
 const Cl={mode:(window.claude&&typeof window.claude.use=='function')?'connecting':'local',db:null,admin:true,me:'',meId:null,pend:0,fail:0,q:Promise.resolve()};
 const lsGet=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k)||'null');return v??d}catch(e){return d}};
 const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}};
 function badge(){const m=Cl.mode,[t,c]=m=='local'?['Solo este equipo','']:m=='connecting'?['Conectando…','w']:m=='error'?['Sin conexión','r']:Cl.fail?['Error al sincronizar','r']:Cl.pend?['Guardando…','w']:['En línea · guardado','g'];const b=$('#sync');b.className='bd dot '+(c||'n');b.textContent=t}
 function cop(fn){Cl.pend++;badge();Cl.q=Cl.q.then(async()=>{for(let i=0;i<3;i++){try{await fn();Cl.pend--;badge();return}catch(e){if(e&&(e.code=='unavailable'||e.code=='resource_exhausted')){await new Promise(r=>setTimeout(r,700+i*900));continue}console.error(e);break}}Cl.pend--;Cl.fail++;badge();toast('No se pudo guardar en la base compartida. Descargue un respaldo desde Configuración.')});return Cl.q}
 const ready=()=>{if(Cl.mode=='connecting'){toast('Conectando con la base compartida… intente en unos segundos');return false}if(Cl.mode=='error'){toast('Sin conexión con la base compartida. Recargue la página.');return false}return true};
-const coll={v:'visitas',k:'clientes',s:'supervisores',a:'solicitudes',b2:'brechas'};
-const arrOf=k=>k=='v'?V:k=='k'?K:k=='a'?ARC:k=='b2'?BRE:S;
+const coll={v:'visitas',k:'clientes',s:'supervisores',a:'solicitudes',b2:'brechas',pv:'programa'};
+const arrOf=k=>k=='v'?V:k=='k'?K:k=='a'?ARC:k=='b2'?BRE:k=='pv'?PRG:S;
 function persistLocal(k){if(!lsSet(LK[k],arrOf(k)))toast('Sin espacio en este equipo: descargue un respaldo y borre actas antiguas')}
 function put(k,o){const a=arrOf(k),i=a.findIndex(x=>x.id==o.id);i<0?a.unshift(o):a[i]=o;
  if(Cl.mode=='cloud')cop(()=>Cl.db.collection(coll[k]).doc(o.id).set(JSON.parse(JSON.stringify(o))));else persistLocal(k)}
@@ -1150,16 +1220,17 @@ function setBrand(b){BR=b;if(Cl.mode=='cloud')cop(()=>Cl.db.doc('config/marca').
 const sortV=()=>V.sort((a,b)=>((b.fec||'')+(b.hor||'')).localeCompare((a.fec||'')+(a.hor||'')));
 
 async function initStore(){
- V=lsGet(LK.v,[]);K=lsGet(LK.k,[]);S=lsGet(LK.s,[]);BR=lsGet(LK.b,{});ARC=lsGet(LK.a,[]);BRE=lsGet(LK.b2,[]);ACC=lsGet(LK.l,[]);PR=lsGet(LK.p,{});sortV();refreshAll();brandApply();badge();
+ V=lsGet(LK.v,[]);K=lsGet(LK.k,[]);S=lsGet(LK.s,[]);BR=lsGet(LK.b,{});ARC=lsGet(LK.a,[]);BRE=lsGet(LK.b2,[]);ACC=lsGet(LK.l,[]);PR=lsGet(LK.p,{});PRG=lsGet(LK.pv,[]);sortV();refreshAll();brandApply();badge();
  if(Cl.mode!='connecting')return;
  let db=null;try{db=await window.claude.use('db')}catch(e){}
  if(!db){Cl.mode='local';badge();refreshAll();return}
- Cl.db=db;Cl.mode='cloud';V=[];K=[];S=[];BR={};ARC=[];BRE=[];ACC=[];PR={};
- try{const u=await window.claude.use('user');Cl.user=u;if(u){const m=await u.me();Cl.me=(m&&m.name)||'';Cl.meId=(await u.id())||(m&&m.id)||null;Cl.admin=!!((await u.isOwner())||(await u.canEdit()))}else Cl.admin=false}catch(e){Cl.admin=false}
+ Cl.db=db;Cl.mode='cloud';V=[];K=[];S=[];BR={};ARC=[];BRE=[];ACC=[];PR={};PRG=[];
+ try{const u=await window.claude.use('user');Cl.user=u;if(u){const m=await u.me();Cl.me=(m&&m.name)||'';Cl.email=(m&&m.email)||'';Cl.meId=(await u.id())||(m&&m.id)||null;Cl.admin=!!((await u.isOwner())||(await u.canEdit()))}else Cl.admin=false}catch(e){Cl.admin=false}
  const er=e=>{console.error(e);Cl.mode='error';badge()};
  db.collection('visitas').onSnapshot(s=>{V=s.docs.map(d=>d.data()).filter(x=>x&&x.id);sortV();refreshAll();badge()},er);
  db.collection('clientes').onSnapshot(s=>{K=s.docs.map(d=>d.data()).filter(x=>x&&x.id);lists();cfgRender();if(VIEW=='home')homeRender();if(VIEW=='dash')dashRender()},er);
- db.collection('supervisores').onSnapshot(s=>{S=s.docs.map(d=>d.data()).filter(x=>x&&x.id);lists();cfgRender()},er);
+ db.collection('supervisores').onSnapshot(s=>{S=s.docs.map(d=>d.data()).filter(x=>x&&x.id);lists();cfgRender();refreshAll()},er);
+ db.collection('programa').onSnapshot(s=>{PRG=s.docs.map(d=>d.data()).filter(x=>x&&x.id);refreshAll();prgNotify()},e=>console.error(e));
  db.doc('config/marca').onSnapshot(s=>{BR=s.exists?s.data():{};brandApply()},er);
  db.doc('config/privacidad').onSnapshot(s=>{PR=s.exists?s.data():{};brandApply();if(VIEW=='dp')dpRender()},er);
  if(Cl.admin){const soft=e=>console.error(e);
@@ -1180,7 +1251,7 @@ function brandApply(){const emp=BR.empresa||'';
 /* ---------- Navegación ---------- */
 let VIEW='home';
 function go(v){VIEW=v;$$('.view[id^=v-]').forEach(s=>s.hidden=s.id!='v-'+v);$$('#nav button').forEach(b=>{const on=b.dataset.v==v;b.classList.toggle('on',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
- if(v=='form'&&!CUR)newForm();if(v=='hist')histRender();if(v=='comp')compRender();if(v=='dash')dashRender();if(v=='cfg')cfgRender();if(v=='dp')dpRender();if(v=='home')homeRender();scrollTo(0,0)}
+ if(v=='form'&&!CUR)newForm();if(v=='hist')histRender();if(v=='comp')compRender();if(v=='dash')dashRender();if(v=='cfg')cfgRender();if(v=='dp')dpRender();if(v=='home')homeRender();if(v=='prog')prgRender();scrollTo(0,0)}
 $('#nav').addEventListener('click',e=>{const b=e.target.closest('button[data-v]');if(b)go(b.dataset.v)});
 $('#goHome').onclick=()=>go('home');
 document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g)go(g.dataset.go);if(e.target.closest('[data-new]'))startNew()});
@@ -1196,7 +1267,7 @@ const isLate=c=>c.e!='Cerrado'&&c.f&&c.f<today();
 
 /* ---------- Refrescos ---------- */
 function refreshAll(){lists();$('#nbH').textContent=V.length;const open=allComp().filter(c=>c.e!='Cerrado').length;$('#nbC').textContent=open;$('#nbC').hidden=!open;const pa=Cl.admin?dpAlerts():{n:0};$('#nbP').textContent=pa.n;$('#nbP').hidden=!pa.n;if(VIEW=='dp')dpRender();
- if(VIEW=='home')homeRender();if(VIEW=='hist')histRender();if(VIEW=='comp')compRender();if(VIEW=='dash')dashRender();if(VIEW=='cfg')cfgRender()}
+ if(VIEW=='home')homeRender();if(VIEW=='hist')histRender();if(VIEW=='comp')compRender();if(VIEW=='dash')dashRender();if(VIEW=='cfg')cfgRender();if(VIEW=='prog')prgRender();prgBadge()}
 function lists(){const cl=[...new Set([...K.map(k=>k.cli),...V.map(v=>v.cli)].filter(Boolean))].sort();
  $('#dl_cli').innerHTML=cl.map(c=>`<option value="${esc(c)}">`).join('');
  const sel=($('#f_cli').value||'').trim().toLowerCase();
@@ -1215,7 +1286,7 @@ function homeRender(){const cer=V.filter(v=>v.est=='cerrada'),m=today().slice(0,
  const comp=allComp(),open=comp.filter(c=>c.e!='Cerrado'),late=open.filter(isLate),bor=V.filter(v=>v.est=='borrador');
  $('#hCount').textContent=cer.length?`${cer.length} actas registradas.`:'';
  const sinV=sinVisita();
- $('#homeK').innerHTML=kc('fa-clipboard-check','Inspecciones este mes',mes.length,'#0f172a')+kc('fa-broom','Cumplimiento promedio del mes',avg(mes),'#059669')+kc('fa-list-check','Compromisos abiertos',open.length,'#f97316')+kc('fa-clock','Compromisos vencidos',late.length,'#e11d48')+(K.length?kc('fa-building-circle-exclamation',`Centros sin visita (${FREQ()} días)`,sinV.length+' de '+K.length,'#4f46e5'):'');
+ $('#homeK').innerHTML=kc('fa-clipboard-check','Inspecciones este mes',mes.length,'#0f172a')+kc('fa-broom','Cumplimiento promedio del mes',avg(mes),'#059669')+kc('fa-list-check','Compromisos abiertos',open.length,'#f97316')+kc('fa-clock','Compromisos vencidos',late.length,'#e11d48')+kc('fa-triangle-exclamation','Deficientes o críticas del mes',mes.filter(v=>v.cal=='Deficiente'||v.cal=='Critico').length,'#e11d48')+(K.length?kc('fa-building-circle-exclamation',`Centros sin visita (${FREQ()} días)`,sinV.length+' de '+K.length,'#4f46e5'):'');
  let al='';if(late.length)al+=`<div class="al r"><i class="fa-solid fa-triangle-exclamation"></i><span><b>${late.length} compromiso${late.length>1?'s':''} vencido${late.length>1?'s':''}.</b> El más antiguo vencía el ${fD(late.map(c=>c.f).sort()[0])}.</span><button class="btn s" data-go="comp">Revisar</button></div>`;
  if(Cl.admin){const a=dpAlerts();if(a.reqLate)al+=`<div class="al r"><i class="fa-solid fa-scale-balanced"></i><span><b>${a.reqLate} solicitud${a.reqLate>1?'es':''} de derechos</b> con plazo de respuesta vencido.</span><button class="btn s" data-go="dp">Revisar</button></div>`;
   if(a.br)al+=`<div class="al r"><i class="fa-solid fa-bug"></i><span><b>${a.br} incidente${a.br>1?'s':''} de seguridad</b> sin comunicar dentro de la referencia interna de ${brH()} horas.</span><button class="btn s" data-go="dp">Revisar</button></div>`;
@@ -1224,8 +1295,25 @@ function homeRender(){const cer=V.filter(v=>v.est=='cerrada'),m=today().slice(0,
  if(sinV.length)al+=`<div class="al w"><i class="fa-solid fa-building-circle-exclamation"></i><span><b>${sinV.length} centro${sinV.length>1?'s':''} sin visita</b> en los últimos ${FREQ()} días: ${esc(sinV.slice(0,3).map(k=>k.ins).join(', '))}${sinV.length>3?' y otros':''}.</span><button class="btn s" data-go="dash">Ver centros</button></div>`;
  if(bor.length)al+=`<div class="al w"><i class="fa-solid fa-file-pen"></i><span>${bor.length} acta${bor.length>1?'s':''} en borrador sin finalizar.</span><button class="btn s" data-go="hist">Ver</button></div>`;
  const ld=lsGet(LK.d,null);if(ld&&ld.t&&(!CUR||CUR.id!=ld.c.id))al+=`<div class="al i"><i class="fa-solid fa-rotate"></i><span>Hay una inspección sin guardar en este equipo (${fDT(ld.t)}).</span><button class="btn s" id="recDraft">Recuperar</button></div>`;
- $('#alerts').innerHTML=al;const rd=$('#recDraft');if(rd)rd.onclick=()=>{loadForm(ld.c);go('form');toast('Inspección recuperada')};
+ al=prgAlerts()+al;$('#alerts').innerHTML=al;homeSum();const rd=$('#recDraft');if(rd)rd.onclick=()=>{loadForm(ld.c);go('form');toast('Inspección recuperada')};
  const r=V.slice(0,6);$('#recent').innerHTML=r.length?`<div class="tw cards"><table><tbody>${r.map(rowH).join('')}</tbody></table></div>`:`<div class="empty"><i class="fa-solid fa-clipboard"></i>Aún no hay inspecciones. Pulse <b>Nueva inspección</b> para registrar la primera visita.</div>`}
+
+function homeSum(){const cer=V.filter(v=>v.est=='cerrada'&&v.fec),dd=new Date();dd.setDate(1);dd.setMonth(dd.getMonth()-2);const desde=dd.toISOString().slice(0,7);
+ const a=cer.filter(v=>v.fec.slice(0,7)>=desde),sc=a.filter(v=>v.score!=null),MN=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+ $('#hsPer').textContent=`Actas finalizadas desde ${MN[+desde.slice(5)-1]} ${desde.slice(0,4)} · ${a.length} acta${a.length==1?'':'s'}`;
+ const none=m=>`<div class="empty"><i class="fa-solid fa-chart-simple"></i>${m||'Sin actas finalizadas en el período.'}</div>`;
+ if(!a.length){$('#hsDist').innerHTML=none();$('#hsIns').innerHTML=none();$('#hsTop').innerHTML=none()}else{
+  const cnt=CALS.map(k=>[k,a.filter(v=>v.cal==k).length]);
+  $('#hsDist').innerHTML=`<div class="stk">${cnt.filter(x=>x[1]).map(([k,n])=>`<i style="width:${100*n/a.length}%;background:${CALC[k]}" title="${CALN[k]}: ${n}"></i>`).join('')}</div><div class="lg2">${cnt.map(([k,n])=>`<span><i style="background:${CALC[k]}"></i>${CALN[k]} <b class="num">${n}</b> <span class="mu num">(${Math.round(100*n/a.length)}%)</span></span>`).join('')}</div>`;
+  const ins={};sc.forEach(v=>{const k=v.ins+' · '+v.cli;(ins[k]=ins[k]||[]).push(v.score)});
+  const il=Object.entries(ins).map(([k,s])=>[k,Math.round(s.reduce((p,q)=>p+q,0)/s.length),s.length]).sort((x,y)=>x[1]-y[1]).slice(0,5);
+  $('#hsIns').innerHTML=il.length?il.map(([k,p,n])=>hbar(k,p,100,pctCol(p),p+'% · '+n)).join(''):none();
+  const tp={};a.flatMap(v=>v.items||[]).filter(i=>i.st=='NC').forEach(i=>{tp[i.t]=tp[i.t]||{n:0,k:i.k};tp[i.t].n++});const tl=Object.entries(tp).sort((x,y)=>y[1].n-x[1].n).slice(0,5);
+  const mx=Math.max(1,...tl.map(x=>x[1].n));
+  $('#hsTop').innerHTML=tl.length?tl.map(([t,o])=>hbar(t+(o.k?' (crítico)':''),o.n,mx,o.k?'var(--int-solid)':'var(--mod-solid)',o.n+(o.n==1?' vez':' veces'))).join(''):'<div class="empty"><i class="fa-solid fa-circle-check"></i>Sin incumplimientos en el período.</div>'}
+ const ms={};cer.filter(v=>v.score!=null).forEach(v=>{const m=v.fec.slice(0,7);(ms[m]=ms[m]||[]).push(v.score)});const mk=Object.keys(ms).sort().slice(-6);
+ $('#hsMon').innerHTML=mk.length?`<div class="vb">${mk.map(m=>{const x=Math.round(ms[m].reduce((p,q)=>p+q,0)/ms[m].length);return`<div><b>${x}%</b><i style="height:${x}%" title="${ms[m].length} actas"></i></div>`}).join('')}</div><div class="vl">${mk.map(m=>`<span>${MN[+m.slice(5)-1]} ${m.slice(2,4)}<br>${ms[m].length} actas</span>`).join('')}</div>`:none();
+ icoFix&&icoFix($('#v-home'))}
 
 /* ---------- Formulario ---------- */
 let CUR=null,FILT='ALL',dirty=false;
@@ -1357,7 +1445,7 @@ function commit(est){if(!ready())return false;readForm();const r=calc(CUR.items)
  const fotos=CUR.fotos||[];const rec={...JSON.parse(JSON.stringify(CUR)),folio:CUR.folio||folioFor(CUR),est,score:r.score,cal:r.cal,nc:r.nc,cnc:r.cnc,nf2:CUR.fotosPend?(prev?prev.nf2||0:0):fotos.length,phx:CUR.fotosPend?(prev?prev.phx||{}:{}):fotos.reduce((m,f,n)=>{if(f.it)(m[f.it]=m[f.it]||[]).push(n+1);return m},{}),cod:BR.cod||'',ver:BR.ver||'',upd:new Date().toISOString(),by:CUR.by||Cl.meId||'local',log:[...(CUR.log||[]),{at:new Date().toISOString(),ev:est=='cerrada'?'Acta finalizada':'Borrador guardado',by:Cl.meId||''}].slice(-30)};
  if(rec.pre!=='')rec.pre=+rec.pre;if(rec.pro!=='')rec.pro=+rec.pro;
  delete rec.fotos;delete rec.fotosPend;rec.cmp=rec.cmp.map(c=>({...c,e:c.e||'Abierto'}));
- put('v',rec);if(!CUR.fotosPend)putFotos(rec.id,JSON.parse(JSON.stringify(fotos)),prevN);
+ put('v',rec);if(est=='cerrada')prgLink(rec);if(!CUR.fotosPend)putFotos(rec.id,JSON.parse(JSON.stringify(fotos)),prevN);
  const s=rec.sup&&rec.sup.toLowerCase();if(s&&!S.some(x=>x.n.toLowerCase()==s)&&Cl.admin)put('s',{id:uid(),n:rec.sup,r:rec.rut&&rutOk(rec.rut)?rutFmt(rec.rut):''});
  const ki=rec.ins.toLowerCase(),kc2=rec.cli.toLowerCase();if(rec.ins&&!K.some(x=>x.ins.toLowerCase()==ki&&x.cli.toLowerCase()==kc2)&&Cl.admin)put('k',{id:uid(),cli:rec.cli,ins:rec.ins,con:rec.con,car:rec.cca});
  try{localStorage.removeItem(LK.d)}catch(e){}dirty=false;return rec}
@@ -1461,11 +1549,11 @@ function dashTables(a,c,su){const none='<div class="empty"><i class="fa-solid fa
 
 /* ---------- Configuración ---------- */
 function cfgRender(){{const o=document.getElementById('ordC');if(o)o.innerHTML=selOrdenCentros('f');}$$('#v-cfg .adm').forEach(e=>e.hidden=!Cl.admin);$('#cfgRo').hidden=Cl.admin;$('#cEmp').disabled=!Cl.admin;['#cCod','#cVer','#cFrq'].forEach(s=>$(s).disabled=!Cl.admin);
- $('#sL').innerHTML=S.length?[...S].sort((a,b)=>a.n.localeCompare(b.n)).map(s=>`<div><span><b>${esc(s.n)}</b><small>${esc(s.r?(Cl.admin?s.r:mrut(s.r)):'Sin RUT')}</small></span>${Cl.admin?`<button class="xdel" data-ds="${s.id}" title="Quitar"><i class="fa-solid fa-trash-can"></i></button>`:''}</div>`).join(''):'<div class="mu sm">Sin supervisores. Se agregan solos al finalizar actas, o regístrelos aquí.</div>';
+ $('#sL').innerHTML=S.length?[...S].sort((a,b)=>a.n.localeCompare(b.n)).map(s=>{const nc=K.filter(k=>k.sup==s.id).length;return`<div><span><b>${esc(s.n)}</b><small>${esc(s.r?(Cl.admin?s.r:mrut(s.r)):'Sin RUT')}${s.mail?' · '+esc(s.mail):''} · ${nc} centro${nc==1?'':'s'} asignado${nc==1?'':'s'} · ${s.uid?'cuenta vinculada':'sin cuenta vinculada'}</small></span>${Cl.admin?`<span style="display:flex;gap:4px"><button class="xdel" data-es="${s.id}" title="Editar"><i class="fa-solid fa-pen"></i></button><button class="xdel" data-ds="${s.id}" title="Quitar"><i class="fa-solid fa-trash-can"></i></button></span>`:''}</div>`}).join(''):'<div class="mu sm">Sin supervisores. Se agregan solos al finalizar actas, o regístrelos aquí.</div>';
  $('#kN0').textContent=K.length+' centro'+(K.length==1?'':'s');if($('#cTheme')&&document.activeElement!=$('#cTheme'))$('#cTheme').value=thGet();
- $('#kL').innerHTML=K.length?ordenarCentros(K).map(k=>`<div><span>${k.cod?`<span class="gc-code">${esc(k.cod)}</span>`:''}<b>${esc(k.ins)}</b><small>${esc(k.cli)}${k.dot!==undefined&&k.dot!==''?' · dotación '+esc(k.dot):''}${k.con?' · '+esc(k.con):''}${k.car?' ('+esc(k.car)+')':''}</small></span>${Cl.admin?`<button class="xdel" data-dk="${k.id}" title="Quitar"><i class="fa-solid fa-trash-can"></i></button>`:''}</div>`).join(''):'<div class="mu sm">Sin instalaciones. Cárguelas con la planilla maestra de centros o agréguelas aquí. Al elegir una en el acta se completan cliente y contacto.</div>';
+ $('#kL').innerHTML=K.length?ordenarCentros(K).map(k=>`<div><span>${k.cod?`<span class="gc-code">${esc(k.cod)}</span>`:''}<b>${esc(k.ins)}</b><small>${esc(k.cli)}${k.dot!==undefined&&k.dot!==''?' · dotación '+esc(k.dot):''}${k.con?' · '+esc(k.con):''}${k.car?' ('+esc(k.car)+')':''}${!Cl.admin?' · Supervisor: '+esc((supById(k.sup)||{}).n||'sin asignar'):''}</small></span>${Cl.admin?`<select class="inp" data-ksup="${k.id}" title="Supervisor asignado" style="width:auto;max-width:190px;min-height:32px;padding:4px 8px;font-size:.82rem"><option value="">Sin supervisor</option>${[...S].sort((a,b)=>a.n.localeCompare(b.n)).map(s=>`<option value="${s.id}"${k.sup==s.id?' selected':''}>${esc(s.n)}</option>`).join('')}</select>`:''}${Cl.admin?`<button class="xdel" data-dk="${k.id}" title="Quitar"><i class="fa-solid fa-trash-can"></i></button>`:''}</div>`).join(''):'<div class="mu sm">Sin instalaciones. Cárguelas con la planilla maestra de centros o agréguelas aquí. Al elegir una en el acta se completan cliente y contacto.</div>';
  $('#stInfo').textContent=Cl.mode=='cloud'?'Los datos se guardan en la base compartida del artefacto: se ven desde cualquier equipo y no se pierden al actualizar la aplicación.':'Los datos se guardan solo en este navegador. Descargue respaldos con frecuencia.'}
-$('#sA').onclick=()=>{const n=$('#sN').value.trim(),r=$('#sR').value.trim();if(!n){$('#sN').focus();return}if(r&&!rutOk(r)){$('#sR').classList.add('bad');toast('RUT no válido');return}if(!ready())return;put('s',{id:uid(),n,r:r?rutFmt(r):''});$('#sN').value=$('#sR').value='';$('#sR').classList.remove('bad');cfgRender();lists();toast('Supervisor agregado')};
+$('#sA').onclick=()=>{const n=$('#sN').value.trim(),r=$('#sR').value.trim();if(!n){$('#sN').focus();return}if(r&&!rutOk(r)){$('#sR').classList.add('bad');toast('RUT no válido');return}if(!ready())return;const ml=($('#sM').value||'').trim().toLowerCase();put('s',{id:uid(),n,r:r?rutFmt(r):'',...(ml?{mail:ml}:{})});$('#sN').value=$('#sR').value=$('#sM').value='';$('#sR').classList.remove('bad');cfgRender();lists();toast('Supervisor agregado')};
 $('#kA').onclick=()=>{const cli=$('#kC').value.trim(),ins=$('#kI').value.trim(),cod=ncod($('#kK').value);if(!cli||!ins){toast('Indique cliente e instalación');return}if(!ready())return;
  if(cod&&K.some(k=>ncod(k.cod)==cod)){toast('Ya existe un centro con el código '+cod);return}if(K.some(k=>cenK(k.cli,k.ins)==cenK(cli,ins))){toast('Ese centro ya está registrado para el cliente');return}
  const dot=gcEnt($('#kD').value);if(dot===null){toast('La dotación debe ser un número entero');return}put('k',{id:uid(),cod,cli,ins,...(dot!==''?{dot}:{}),con:$('#kN').value.trim(),car:$('#kG').value.trim()});['#kK','#kI','#kN','#kG','#kD'].forEach(s=>$(s).value='');cfgRender();lists();toast('Instalación agregada')};
@@ -1479,8 +1567,8 @@ $('#cTheme').onchange=e=>{try{localStorage.setItem(THK,e.target.value)}catch(er)
 /* Lee solo las columnas que usa esta app: Código, Centro de Trabajo, Cliente, Dotación, Administrador / Encargado y Cargo del encargado. */
 const nrm=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 const ncod=s=>String(s??'').trim().toUpperCase().replace(/\s+/g,'');
-const IMPC={cod:['codigo','codigo del centro','codigo centro'],ins:['centro de trabajo'],cli:['cliente','mandante cliente','empresa cliente'],con:['administrador encargado','contacto encargado','encargado'],car:['cargo del encargado','cargo del contacto','cargo encargado'],dot:['dotacion','n de trabajadores','numero de trabajadores']};
-const IMPN={cod:'Código',ins:'Centro de Trabajo',cli:'Cliente',dot:'Dotación',con:'Administrador / Encargado',car:'Cargo del encargado'};
+const IMPC={cod:['codigo','codigo del centro','codigo centro'],ins:['centro de trabajo'],cli:['cliente','mandante cliente','empresa cliente'],con:['administrador encargado','contacto encargado','encargado'],car:['cargo del encargado','cargo del contacto','cargo encargado'],dot:['dotacion','n de trabajadores','numero de trabajadores'],sup:['supervisor a de terreno','supervisor de terreno','supervisora de terreno','supervisor a','supervisor'],smail:['correo supervisor','correo del supervisor','correo supervisor a','email supervisor','mail supervisor']};
+const IMPN={cod:'Código',ins:'Centro de Trabajo',cli:'Cliente',dot:'Dotación',con:'Administrador / Encargado',car:'Cargo del encargado',sup:'Supervisor/a de Terreno',smail:'Correo supervisor'};
 function csvRows(t){t=t.replace(/^\uFEFF/,'');const first=t.split(/\r?\n/).find(l=>l.trim())||'';const cnt=c=>first.split(c).length;const d=[';',',','\t'].sort((a,b)=>cnt(b)-cnt(a))[0];
  const rows=[];let r=[],f='',q=false;
  for(let i=0;i<t.length;i++){const ch=t[i];
@@ -1499,10 +1587,15 @@ function impPlan(rows){
  const hd=(rows[h]||[]).map(nrm),col={};Object.entries(IMPC).forEach(([k,al])=>{const i=hd.findIndex(x=>al.includes(x));if(i>=0)col[k]=i});
  if(col.cli==null)return{err:'La planilla no tiene la columna «Cliente», que es obligatoria.'};
  const out={nw:[],up:[],same:[],om:[],cols:Object.keys(IMPN).filter(k=>col[k]!=null).map(k=>IMPN[k]),miss:Object.keys(IMPN).filter(k=>col[k]==null).map(k=>IMPN[k]),hdr:h+1,ren:0};
- const work=K.map(k=>({...k})),seen={};
+ const work=K.map(k=>({...k})),seen={},sw=S.map(s=>({...s}));out.ns=[];out.sm=[];
+ const supRes=(nm,ml)=>{nm=String(nm||'').replace(/\s+/g,' ').trim();ml=String(ml||'').trim().toLowerCase();if(!nm&&!ml)return null;
+  if(ml&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ml))ml='';
+  let s=(ml&&sw.find(x=>(x.mail||'').toLowerCase()==ml))||(nm&&sw.find(x=>nrm(x.n)==nrm(nm)));
+  if(!s){if(!nm)return null;s={id:uid(),n:nm,r:'',...(ml?{mail:ml}:{})};sw.push(s);out.ns.push(s);return s}
+  if(ml&&!s.mail){s.mail=ml;if(!out.ns.includes(s)&&!out.sm.includes(s))out.sm.push(s)}return s};
  for(let i=h+1;i<rows.length;i++){const r=rows[i]||[];if(!r.some(c=>String(c??'').trim()))continue;const fila=i+1;
   const g=k=>col[k]==null?'':String(r[col[k]]??'').replace(/\s+/g,' ').trim();
-  const d={cod:ncod(g('cod')),ins:g('ins'),cli:g('cli'),con:g('con'),car:g('car'),dot:gcEnt(g('dot'))};
+  const d={cod:ncod(g('cod')),ins:g('ins'),cli:g('cli'),con:g('con'),car:g('car'),dot:gcEnt(g('dot')),sn:g('sup'),sm:g('smail')};
   const om=m=>out.om.push({fila,ins:d.ins||'—',cli:d.cli,m});
   if(d.dot===null){(out.av||(out.av=[])).push(`Fila ${fila}: Dotación «${g('dot')}» no es un número entero; no se modifica`);d.dot=''}
   if(!d.ins){om('Falta el nombre en «Centro de Trabajo»');continue}
@@ -1516,23 +1609,26 @@ function impPlan(rows){
    if(byN.length>1){om(`Hay ${byN.length} centros registrados con este nombre y cliente; agregue el Código para saber cuál actualizar`);continue}
    if(byN.length==1){t=byN[0];if(d.cod&&t.cod&&ncod(t.cod)!=d.cod){om(`El centro ya tiene el código ${t.cod}; el código no se cambia por carga`);continue}}}
   if(d.cod)seen['c:'+d.cod]=fila;seen['n:'+kn]=fila;
-  if(!t){const n={id:uid(),cod:d.cod,cli:d.cli,ins:d.ins,con:d.con,car:d.car,...(d.dot!==''?{dot:d.dot}:{})};work.push(n);out.nw.push({fila,o:n});continue}
+  const sp=(d.sn||d.sm)?supRes(d.sn,d.sm):null;
+  if(!t){const n={id:uid(),cod:d.cod,cli:d.cli,ins:d.ins,con:d.con,car:d.car,...(d.dot!==''?{dot:d.dot}:{}),...(sp?{sup:sp.id}:{})};work.push(n);out.nw.push({fila,o:n,supN:sp?sp.n:''});continue}
   const t0={...t},ch=[];
   [['cod','Código'],['ins','Centro'],['cli','Cliente'],['con','Encargado'],['car','Cargo']].forEach(([k,l])=>{const nv=d[k];if(!nv)return;const cur=String(t[k]||'');
    if(k=='cod'){if(cur)return}else if(cur.trim()==nv)return;
    ch.push({l,a:cur,b:nv});t[k]=nv});
   if(d.dot!==''&&d.dot!==t.dot){ch.push({l:'Dotación',a:t.dot===undefined||t.dot===''?'':String(t.dot),b:String(d.dot)});t.dot=d.dot}
+  if(sp&&t.sup!=sp.id){ch.push({l:'Supervisor',a:((sw.find(x=>x.id==t.sup)||{}).n)||'',b:sp.n});t.sup=sp.id}
   if(!ch.length){out.same.push({fila,o:t});continue}
   const ren=ch.some(c=>c.l=='Centro'||c.l=='Cliente')&&V.some(v=>cenK(v.cli,v.ins)==cenK(t0.cli,t0.ins));if(ren)out.ren++;
   out.up.push({fila,o:{...t},ch,ren})}
  return out}
 let IMP=null;
 function impShow(p,fname,sheet){IMP=p;$('#toast').classList.remove('on');const LIM=200,more=n=>n>LIM?`<div class="sm mu" style="margin-top:6px">Se muestran ${LIM} de ${n}.</div>`:'';
- const tot=p.nw.length+p.up.length;
+ const tot=p.nw.length+p.up.length+(p.ns||[]).length+(p.sm||[]).length;
  $('#mT').textContent='Cargar planilla de centros';$('#mS').textContent=`${fname} · hoja «${sheet}» · encabezados en la fila ${p.hdr}`;
  const kp=(l,n,t)=>`<div class="gc-kpi${t&&n?' '+t:''}"><span>${l}</span><b class="num">${n}</b></div>`;
- let h=`<div class="imp-k">${kp('Centros nuevos',p.nw.length)}${kp('Centros actualizados',p.up.length)}${kp('Sin cambios',p.same.length)}${kp('Filas omitidas',p.om.length,'gc-kpi--warn')}</div>
+ let h=`<div class="imp-k">${kp('Centros nuevos',p.nw.length)}${kp('Centros actualizados',p.up.length)}${kp('Sin cambios',p.same.length)}${kp('Filas omitidas',p.om.length,'gc-kpi--warn')}${kp('Supervisores nuevos',(p.ns||[]).length)}</div>
  <div class="al i"><i class="fa-solid fa-circle-info"></i><span>Columnas leídas: <b>${p.cols.map(esc).join(', ')}</b>. Las demás columnas de la planilla no se usan en esta app. Las celdas vacías no borran ni cambian lo ya registrado, y el código de un centro que ya lo tiene no se modifica.${p.miss.length?` No se encontró: ${p.miss.map(esc).join(', ')}.`:''}</span></div>`;
+ if((p.ns||[]).length||(p.sm||[]).length)h+=`<div class="al i"><i class="fa-solid fa-user-tie"></i><span>${(p.ns||[]).length?`Se crearán ${p.ns.length} supervisor${p.ns.length>1?'es':''}: <b>${p.ns.map(s=>esc(s.n)+(s.mail?' ('+esc(s.mail)+')':'')).join(', ')}</b>. `:''}${(p.sm||[]).length?`Se agregará el correo a: ${p.sm.map(s=>esc(s.n)+' ('+esc(s.mail)+')').join(', ')}. `:''}Cada centro queda ligado a su supervisor por la columna «Supervisor/a de Terreno» (y «Correo supervisor», que identifica a la persona aunque su nombre esté escrito distinto).</span></div>`;
  if(p.av&&p.av.length)h+=`<div class="al w"><i class="fa-solid fa-triangle-exclamation"></i><span>${p.av.slice(0,8).map(esc).join(' · ')}${p.av.length>8?' …':''}</span></div>`;
  if(p.ren)h+=`<div class="al w"><i class="fa-solid fa-triangle-exclamation"></i><span>${p.ren} centro${p.ren>1?'s':''} con actas cambia${p.ren>1?'n':''} de nombre o de cliente. Las actas anteriores conservan el nombre con que se registraron.</span></div>`;
  if(p.nw.length)h+=`<div class="ms imp-sec"><h4><i class="fa-solid fa-plus"></i>Centros nuevos <span class="gc-tag gc-tag--info">${p.nw.length}</span></h4><div class="tw"><table><thead><tr><th>Fila</th><th>Código</th><th>Centro de trabajo</th><th>Cliente</th><th>Encargado</th></tr></thead><tbody>${p.nw.slice(0,LIM).map(x=>`<tr><td class="num">${x.fila}</td><td>${x.o.cod?`<span class="gc-code">${esc(x.o.cod)}</span>`:'<span class="mu">—</span>'}</td><td><b>${esc(x.o.ins)}</b></td><td>${esc(x.o.cli)}</td><td class="sm">${esc(x.o.con||'—')}${x.o.car?`<div class="mu">${esc(x.o.car)}</div>`:''}</td></tr>`).join('')}</tbody></table></div>${more(p.nw.length)}</div>`;
@@ -1544,6 +1640,7 @@ function impShow(p,fname,sheet){IMP=p;$('#toast').classList.remove('on');const L
  $('#mF').innerHTML=`<button class="btn" data-close>Cancelar</button><button class="btn p" id="impOk"${tot?'':' disabled'}><i class="fa-solid fa-floppy-disk"></i>${tot?`Guardar ${tot} centro${tot>1?'s':''}`:'Nada que guardar'}</button>`;
  $('#mdl').hidden=false;$('#impOk').onclick=impApply}
 function impApply(){const p=IMP;if(!p||!Cl.admin||!ready())return;const at=new Date().toISOString();
+ (p.ns||[]).forEach(s=>put('s',{...s,upd:at}));(p.sm||[]).forEach(s=>{const cur=S.find(x=>x.id==s.id);put('s',{...(cur||{}),mail:s.mail,upd:at})});
  p.nw.forEach(x=>put('k',{...x.o,upd:at}));p.up.forEach(x=>{const cur=K.find(k=>k.id==x.o.id);put('k',{...(cur||{}),...x.o,upd:at})});
  IMP=null;$('#mdl').hidden=true;cfgRender();lists();refreshAll();
  toast(`Planilla cargada: ${p.nw.length} nuevo${p.nw.length==1?'':'s'}, ${p.up.length} actualizado${p.up.length==1?'':'s'}${p.om.length?`, ${p.om.length} fila${p.om.length==1?'':'s'} omitida${p.om.length==1?'':'s'}`:''}`)}
@@ -1586,7 +1683,7 @@ const MCOLS=[
  ['Meta tasa de accidentabilidad','Número (%), ej. 2,0.',0,'','dec',14],
  ['Presupuesto mensual insumos','Pesos, entero.',0,'','clp',16],
  ...MPROT.map(p=>[p,p=='PSICO'?'Aplicabilidad del protocolo MINSAL: Sí / Agrupado / No.':'Aplicabilidad del protocolo MINSAL: Sí / No / Por determinar.',0,p=='PSICO'?'psico':'prot','',10])];
-const MUSE={'Código':'Empareja el centro','Centro de Trabajo':'Instalación','Cliente':'Cliente','Administrador / Encargado':'Contacto del cliente','Cargo del encargado':'Cargo del contacto'};
+const MUSE={'Código':'Empareja el centro','Centro de Trabajo':'Instalación','Cliente':'Cliente','Administrador / Encargado':'Contacto del cliente','Cargo del encargado':'Cargo del contacto','Supervisor/a de Terreno':'Supervisor asignado','Correo supervisor':'Identifica al supervisor'};
 async function tplDownload(btn){
  if(btn)btn.disabled=true;toast('Preparando la plantilla…');
  try{if(!window.ExcelJS)await loadJs('https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js')}catch(e){toast('No se pudo cargar el generador de Excel. Revise la conexión.');if(btn)btn.disabled=false;return}
@@ -1649,8 +1746,9 @@ $('#xXls').onclick=async()=>{const a=V.filter(v=>v.est=='cerrada'&&!v.hold);if(!
  const wb=XLSX.utils.book_new();[[v1,'Visitas'],[v6,'Por área'],[v4,'Por centro'],[v5,'Por supervisor'],[v2,'Hallazgos'],[v3,'Compromisos']].forEach(([d,n])=>{const ws=XLSX.utils.json_to_sheet(d.length?d:[{'Sin datos':''}]);ws['!cols']=Object.keys(d[0]||{a:1}).map(k=>({wch:Math.min(50,Math.max(10,k.length+2,...d.slice(0,200).map(r=>String(r[k]??'').length)))}));XLSX.utils.book_append_sheet(wb,ws,n)});
  const out=XLSX.write(wb,{bookType:'xlsx',type:'array'});await save(`Inspeccion_Servicio_${today()}.xlsx`,new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}))&&(logAcc('Exportación a Excel',`${a.length} actas`),toast('Excel generado'))};
 $('#bkE').onclick=async()=>{if(!Cl.admin){toast('El respaldo completo está reservado al propietario y editores');return}toast('Preparando respaldo…');const fotos={};for(const v of V)if(v.nf2)fotos[v.id]=await getFotos(v.id);
- await save(`Respaldo_Inspeccion_Servicio_${today()}.json`,JSON.stringify({app:'supervision-aseo',ver:3,fecha:new Date().toISOString(),visitas:V,fotos,clientes:K,supervisores:S,marca:BR,privacidad:PR,solicitudes:ARC,brechas:BRE}),'application/json')&&logAcc('Respaldo completo descargado',`${V.length} actas`)};
+ await save(`Respaldo_Inspeccion_Servicio_${today()}.json`,JSON.stringify({app:'supervision-aseo',ver:3,fecha:new Date().toISOString(),visitas:V,fotos,clientes:K,supervisores:S,marca:BR,privacidad:PR,solicitudes:ARC,brechas:BRE,programa:PRG}),'application/json')&&logAcc('Respaldo completo descargado',`${V.length} actas`)};
 $('#bkI').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f||!ready())return;if(!Cl.admin){toast('Restaurar respaldos está reservado al propietario y editores');return}try{const d=JSON.parse(await f.text());if(!d||!Array.isArray(d.visitas))throw 0;let n=0;
+ (d.programa||[]).forEach(p=>{if(p&&p.id&&!PRG.some(x=>x.id==p.id))put('pv',p)});
  d.visitas.forEach(v=>{if(v&&v.id&&!V.some(x=>x.id==v.id)){put('v',v);if(d.fotos&&d.fotos[v.id])putFotos(v.id,d.fotos[v.id],0);n++}});
  (d.clientes||[]).forEach(k=>{if(k&&k.id&&!K.some(x=>x.id==k.id))put('k',k)});(d.supervisores||[]).forEach(s=>{if(s&&s.id&&!S.some(x=>x.id==s.id))put('s',s)});
  if(d.marca&&!BR.logo&&!BR.empresa)setBrand(d.marca);(d.solicitudes||[]).forEach(a=>{if(a&&a.id&&!ARC.some(x=>x.id==a.id))put('a',a)});(d.brechas||[]).forEach(b=>{if(b&&b.id&&!BRE.some(x=>x.id==b.id))put('b2',b)});if(d.privacidad&&!PR.po&&!PR.pc)setPriv(d.privacidad);sortV();refreshAll();toast(`Respaldo restaurado: ${n} acta${n==1?'':'s'} nueva${n==1?'':'s'}`)}catch(er){toast('El archivo no es un respaldo válido de esta aplicación')}};
@@ -1830,6 +1928,201 @@ function loadExample(){const doIt=()=>{loadForm(exampleData());dirty=true;go('fo
  if(CUR&&dirty)ask('Cargar ejemplo','Tiene una inspección con cambios sin guardar. ¿Reemplazarla por los datos de ejemplo?',doIt,'Cargar ejemplo',true);else doIt()}
 document.addEventListener('click',e=>{if(e.target.closest('[data-ex]'))loadExample()});
 
+/* ---------- Programa de visitas ---------- */
+const TIPOS=['Supervisión de rutina','Auditoría de entrega de turno','Aseo profundo / especializado','Atención de reclamo del cliente','Inicio de servicio'];
+const DOW=['Lu','Ma','Mi','Ju','Vi','Sá','Do'],MESN=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const PGS={m:today().slice(0,7),sup:null};
+const supById=id=>S.find(s=>s.id==id);
+function mySup(){const em=(Cl.email||'').toLowerCase();return S.find(s=>s.uid&&Cl.meId&&s.uid==Cl.meId)||(em&&S.find(s=>(s.mail||'').toLowerCase()==em))||(Cl.me&&S.find(s=>nrm(s.n)==nrm(Cl.me)))||null}
+const prgMine=p=>{const m=mySup();return !!(m&&p.sup==m.id)};
+const prgEst=p=>p.est=='programada'&&p.fec<today()?'atrasada':p.est;
+const PEN={programada:'Programada',realizada:'Realizada',cancelada:'Cancelada',atrasada:'Atrasada'};
+const addMin=(h,m)=>{const[a,b]=(h||'09:00').split(':').map(Number),x=a*60+b+(+m||0);return pad(Math.floor(x/60)%24)+':'+pad(x%60)};
+const toMin=h=>{const[a,b]=(h||'0:0').split(':').map(Number);return a*60+b};
+function prgUnseen(){const m=mySup();return m?PRG.filter(p=>p.sup==m.id&&p.adm&&!p.adm.visto&&p.adm.by!==Cl.meId):[]}
+function prgBadge(){const m=mySup();const n=prgUnseen().length+(m?PRG.filter(p=>p.sup==m.id&&p.est=='programada'&&p.fec==today()).length:0);const b=$('#nbG');if(b){b.textContent=n;b.hidden=!n}}
+function prgAlerts(){const m=mySup();if(!m)return Cl.admin?'':(S.length?`<div class="al i"><i class="fa-solid fa-user-tie"></i><span>Vincule su cuenta a su perfil de supervisor para ver su programa de visitas.</span><button class="btn s" data-go="prog">Vincular</button></div>`:'');
+ const mine=PRG.filter(p=>p.sup==m.id),hoy=mine.filter(p=>p.est=='programada'&&p.fec==today()),atr=mine.filter(p=>p.est=='programada'&&p.fec<today()),un=prgUnseen();let a='';
+ if(un.length)a+=`<div class="al r"><i class="fa-solid fa-circle-exclamation"></i><span><b>${un.length} cambio${un.length>1?'s':''} del administrador</b> en su programa de visitas. Último: ${esc(un[0].adm.byN||'Administrador')} · ${esc(un[0].ins)}.</span><button class="btn s" data-go="prog">Revisar</button></div>`;
+ if(hoy.length)a+=`<div class="al i"><i class="fa-solid fa-calendar-plus"></i><span><b>Hoy tiene ${hoy.length} visita${hoy.length>1?'s':''} programada${hoy.length>1?'s':''}:</b> ${hoy.sort((x,y)=>x.hor.localeCompare(y.hor)).map(p=>esc(p.hor+' '+p.ins)).join(' · ')}.</span><button class="btn s" data-go="prog">Ver programa</button></div>`;
+ if(atr.length)a+=`<div class="al w"><i class="fa-solid fa-clock"></i><span>${atr.length} visita${atr.length>1?'s':''} programada${atr.length>1?'s':''} ya vencida${atr.length>1?'s':''} sin acta. Realícela${atr.length>1?'s':''} o reprograme.</span><button class="btn s" data-go="prog">Reprogramar</button></div>`;
+ return a}
+function prgNotify(){try{if(!('Notification' in window)||Notification.permission!='granted')return;const seen=lsGet('gc_prg_notif',[]);const nw=prgUnseen().filter(p=>!seen.includes(p.id+p.adm.at));
+ nw.slice(0,3).forEach(p=>new Notification('Programa de visitas · cambio del administrador',{body:`${p.adm.byN||'Administrador'}: ${p.ins} · ${p.adm.det||''}`}));lsSet('gc_prg_notif',[...seen,...nw.map(p=>p.id+p.adm.at)].slice(-200))}catch(e){}}
+function prgScope(){const m=mySup();if(Cl.admin){if(PGS.sup===null)PGS.sup=m?m.id:'';return PGS.sup}return m?m.id:'__none'}
+function prgRender(){const m=mySup(),sid=prgScope(),mes=PGS.m,hoy=today();
+ /* Selector de supervisor */
+ const ss=$('#pgSup');ss.innerHTML=(Cl.admin?'<option value="">Todos los supervisores</option>':'')+[...S].sort((a,b)=>a.n.localeCompare(b.n)).filter(s=>Cl.admin||(m&&s.id==m.id)).map(s=>`<option value="${s.id}"${s.id==sid?' selected':''}>${esc(s.n)}${m&&s.id==m.id?' (yo)':''}</option>`).join('');ss.disabled=!Cl.admin;
+ $('#pgMes').value=mes;
+ /* Avisos */
+ let top='';
+ if(!m&&!Cl.admin){const libres=S.filter(s=>!s.uid);top+=`<div class="pgn"><i class="fa-solid fa-user-tie"></i><div class="tx"><b>Vincule su cuenta con su perfil de supervisor.</b><br>Así verá solo sus centros asignados y sus visitas. ${libres.length?'Elija su nombre:':'No hay perfiles disponibles: pida al administrador que lo registre en Configuración → Supervisores.'}</div>${libres.length?`<select class="inp" id="pgLinkS" style="width:auto">${libres.sort((a,b)=>a.n.localeCompare(b.n)).map(s=>`<option value="${s.id}">${esc(s.n)}</option>`).join('')}</select><button class="btn p s" id="pgLinkB">Soy yo</button>`:''}</div>`}
+ const un=prgUnseen();if(un.length>1)top+=`<div class="row" style="justify-content:space-between;align-items:center"><b>${un.length} cambios del administrador sin revisar</b><button class="btn s" data-pgack="__all"><i class="fa-solid fa-check-double"></i>Marcar todos como revisados</button></div>`;if(un.length)top+=un.sort((a,b)=>b.adm.at.localeCompare(a.adm.at)).slice(0,6).map(p=>`<div class="pgn" style="border-left-color:var(--int-solid);background:var(--int-bg);color:var(--int-fg)"><i class="fa-solid fa-circle-exclamation"></i><div class="tx"><b>${esc(p.adm.byN||'Administrador')} (Administrador)</b> ${p.adm.nuevo?'le asignó':'modificó'} su visita a <b>${esc(p.ins)}</b> · ${esc(p.cli)} — ${fD(p.fec)} ${esc(p.hor)}.<br>${esc(p.adm.det||'')}${p.adm.mot?`<br><i>Motivo: ${esc(p.adm.mot)}</i>`:''}<div class="sm" style="margin-top:2px">${fDT(p.adm.at)}</div></div><button class="btn s" data-pgack="${p.id}"><i class="fa-solid fa-check"></i>Entendido</button><button class="btn s" data-pged="${p.id}">Ver visita</button></div>`).join('');
+ $('#pgTop').innerHTML=top;
+ const lb=$('#pgLinkB');if(lb)lb.onclick=()=>{const s=supById($('#pgLinkS').value);if(!s||!ready())return;if(!Cl.meId){toast('No se pudo identificar su cuenta');return}put('s',{...s,uid:Cl.meId,ulink:new Date().toISOString(),uname:Cl.me||''});toast('Cuenta vinculada a '+s.n);setTimeout(prgRender,50)};
+ /* Datos del mes */
+ const L=PRG.filter(p=>(!sid||p.sup==sid)&&(p.fec||'').slice(0,7)==mes).sort((a,b)=>(a.fec+a.hor).localeCompare(b.fec+b.hor));
+ const act=L.filter(p=>p.est!='cancelada'),rea=act.filter(p=>p.est=='realizada'),atr=act.filter(p=>p.est=='programada'&&p.fec<hoy),pend=act.filter(p=>p.est=='programada'&&p.fec>=hoy);
+ const venc=act.filter(p=>p.fec<hoy||p.est=='realizada'),cum=venc.length?Math.round(100*venc.filter(p=>p.est=='realizada').length/venc.length):null;
+ const cens=sid?K.filter(k=>k.sup==sid):K.filter(k=>k.sup),sinProg=cens.filter(k=>!act.some(p=>p.k==k.id));
+ $('#pgK').innerHTML=kc('fa-calendar-plus','Visitas programadas del mes',act.length,'#0f172a')+kc('fa-circle-check','Realizadas',rea.length,'#059669')+kc('fa-clipboard-check','Cumplimiento del programa a la fecha',cum==null?'—':cum+'%','#059669')+kc('fa-clock','Atrasadas sin acta',atr.length,'#e11d48')+kc('fa-building-circle-exclamation','Centros asignados sin visita en el mes',sinProg.length+(cens.length?' de '+cens.length:''),'#f97316');
+ /* Calendario */
+ const [y,mo]=mes.split('-').map(Number),first=new Date(y,mo-1,1),dim=new Date(y,mo,0).getDate(),off=(first.getDay()+6)%7;
+ $('#pgCalT').textContent='Calendario · '+MESN[mo-1]+' '+y;
+ let c=DOW.map(d=>`<div class="dh">${d}</div>`).join('');for(let i=0;i<off;i++)c+='<div class="pcd o"></div>';
+ for(let d=1;d<=dim;d++){const f=`${y}-${pad(mo)}-${pad(d)}`,dl=L.filter(p=>p.fec==f),we=((off+d-1)%7)>=5;
+  c+=`<div class="pcd${f==hoy?' t':''}${we?' we':''}" data-pgday="${f}"><span class="dn">${d}</span>${dl.slice(0,3).map(p=>`<button class="pch ps-${prgEst(p)}" data-pged="${p.id}" title="${esc(p.hor+' · '+p.ins+' · '+p.cli+' · '+(p.supN||'')+' · '+PEN[prgEst(p)])}">${esc(p.hor)}<span class="tn"> ${esc(p.ins)}</span></button>`).join('')}${dl.length>3?`<span class="sm mu">+${dl.length-3} más</span>`:''}</div>`}
+ $('#pgCal').innerHTML=`<div class="pcal">${c}</div><div class="lg2" style="margin-top:8px">${['programada','realizada','atrasada','cancelada'].map(k=>`<span><i class="ps-${k}" style="border-radius:3px"></i>${PEN[k]}</span>`).join('')}</div>`;
+ /* Agenda */
+ const by={};L.forEach(p=>(by[p.fec]=by[p.fec]||[]).push(p));
+ $('#pgList').innerHTML=L.length?`<div class="pgag">${Object.keys(by).sort().map(f=>{const dt=new Date(f+'T12:00');return`<div class="pgday"><h4>${dt.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'})}${f==hoy?' · hoy':''}</h4>${by[f].map(p=>`<div class="pgit" data-pged="${p.id}"><span class="hr">${esc(p.hor)}</span><div class="bd2"><b>${p.cod?`<span class="gc-code">${esc(p.cod)}</span> `:''}${esc(p.ins)}</b><span class="sm mu">${esc(p.cli)} · ${esc(p.tip||'')}${!sid?' · '+esc(p.supN||''):''}${p.folio?' · acta '+esc(p.folio):''}</span></div>${p.adm&&!p.adm.visto?'<span class="gc-tag gc-tag--warn" title="Cambio del administrador sin revisar">Cambio</span>':''}<span class="gc-tag ps-${prgEst(p)}">${PEN[prgEst(p)]}</span></div>`).join('')}</div>`}).join('')}</div>`:`<div class="empty"><i class="fa-solid fa-calendar-plus"></i>Sin visitas en ${MESN[mo-1]}. Use <b>Programa sugerido</b> para generar el mes o <b>Nueva visita</b>.</div>`;
+ /* Centros asignados */
+ const lv=lastVisit();
+ $('#pgCenT').textContent=sid?'Centros asignados · '+((supById(sid)||{}).n||''):'Centros con supervisor asignado';
+ $('#pgCenI').textContent=cens.length?`${cens.length} centro${cens.length==1?'':'s'} · frecuencia de visita cada ${FREQ()} días`:'';
+ $('#pgCen').innerHTML=cens.length?`<div class="tw"><table><thead><tr><th>Centro</th><th>Cliente</th>${sid?'':'<th>Supervisor</th>'}<th>Última visita</th><th>Próxima programada</th><th></th></tr></thead><tbody>${ordenarCentros(cens).map(k=>{const u=lv[cenK(k.cli,k.ins)],nx=PRG.filter(p=>p.k==k.id&&p.est=='programada'&&p.fec>=hoy).sort((a,b)=>(a.fec+a.hor).localeCompare(b.fec+b.hor))[0],dias=u?Math.round((new Date(hoy)-new Date(u))/864e5):null,ven=dias==null||dias>FREQ();
+  return`<tr><td>${k.cod?`<span class="gc-code">${esc(k.cod)}</span> `:''}<b>${esc(k.ins)}</b></td><td class="sm">${esc(k.cli)}</td>${sid?'':`<td class="sm">${esc((supById(k.sup)||{}).n||'—')}</td>`}<td class="sm num">${u?fD(u)+` <span class="${ven?'late':'mu'}">(${dias} d)</span>`:'<span class="late">Sin visitas</span>'}</td><td class="sm num">${nx?fD(nx.fec)+' '+esc(nx.hor):'<span class="mu">—</span>'}</td><td class="ac"><button class="btn s" data-pgk="${k.id}"><i class="fa-solid fa-calendar-plus"></i>Agendar</button></td></tr>`}).join('')}</tbody></table></div>`:`<div class="empty"><i class="fa-solid fa-building"></i>${sid?'Este supervisor no tiene centros asignados. ':'Aún no hay centros asignados a supervisores. '}Asígnelos en Configuración → Clientes e instalaciones, o con la columna «Supervisor/a de Terreno» de la planilla de centros.</div>`;
+ $('#pgGen').hidden=!(Cl.admin||m);$('#pgNew').hidden=!(Cl.admin||m)}
+/* Editor de visita */
+function prgCenOpts(sid,sel){const a=ordenarCentros(K.filter(k=>k.sup==sid)),o=ordenarCentros(K.filter(k=>k.sup!=sid));const op=k=>`<option value="${k.id}"${k.id==sel?' selected':''}>${k.cod?esc(k.cod)+' · ':''}${esc(k.ins)} — ${esc(k.cli)}</option>`;
+ return '<option value="">Elija un centro…</option>'+(a.length?`<optgroup label="Centros asignados">${a.map(op).join('')}</optgroup>`:'')+(o.length&&(Cl.admin||!a.length||o.some(k=>k.id==sel))?`<optgroup label="Otros centros">${o.map(op).join('')}</optgroup>`:'')}
+function prgEdit(id,pre){const p=id?PRG.find(x=>x.id==id):null,m=mySup();if(!Cl.admin&&!m){toast('Primero vincule su cuenta a su perfil de supervisor');go('prog');return}
+ if(p&&!Cl.admin&&p.sup!=m.id){toast('Solo puede editar sus propias visitas');return}
+ const d=p?{...p}:{id:uid(),sup:Cl.admin?(PGS.sup||(m?m.id:(S[0]||{}).id||'')):m.id,k:(pre&&pre.k)||'',fec:(pre&&pre.fec)||today(),hor:'09:00',dur:60,tip:TIPOS[0],obj:'',rem:60,est:'programada'};
+ const notifies=()=>Cl.admin&&!(m&&$('#pgS').value==m.id);
+ $('#mT').textContent=p?'Visita programada':'Nueva visita';$('#mS').textContent=p?`${p.cod?p.cod+' · ':''}${p.ins} · ${p.cli}`:'Programa de visitas';
+ $('#mB').innerHTML=`<div class="pgform">
+  <label class="f">Supervisor<select id="pgS" class="inp"${Cl.admin?'':' disabled'}>${[...S].sort((a,b)=>a.n.localeCompare(b.n)).map(s=>`<option value="${s.id}"${s.id==d.sup?' selected':''}>${esc(s.n)}</option>`).join('')}</select></label>
+  <label class="f">Centro de trabajo<select id="pgC" class="inp">${prgCenOpts(d.sup,d.k)}</select></label>
+  <label class="f">Fecha<input id="pgF" type="date" class="inp" value="${esc(d.fec)}"></label>
+  <label class="f">Hora<input id="pgH" type="time" class="inp" value="${esc(d.hor)}"></label>
+  <label class="f">Duración estimada<select id="pgD" class="inp">${[30,60,90,120,180,240].map(n=>`<option value="${n}"${+d.dur==n?' selected':''}>${n<60?n+' min':(n/60)+' h'}</option>`).join('')}</select></label>
+  <label class="f">Tipo de inspección<select id="pgT" class="inp">${TIPOS.map(x=>`<option${x==d.tip?' selected':''}>${esc(x)}</option>`).join('')}</select></label>
+  <label class="f">Recordatorio en el calendario<select id="pgR" class="inp">${[[0,'Sin recordatorio'],[15,'15 min antes'],[30,'30 min antes'],[60,'1 hora antes'],[120,'2 horas antes'],[1440,'1 día antes']].map(([v,l])=>`<option value="${v}"${+d.rem==v?' selected':''}>${l}</option>`).join('')}</select></label>
+  ${p?`<label class="f">Estado<select id="pgE" class="inp">${['programada','realizada','cancelada'].map(k=>`<option value="${k}"${p.est==k?' selected':''}>${PEN[k]}</option>`).join('')}</select></label>`:`<label class="f">Repetir<select id="pgRep" class="inp"><option value="0">No se repite</option><option value="7">Cada semana</option><option value="14">Cada 2 semanas</option><option value="m">Cada mes</option></select></label>`}
+  ${p?'':`<label class="f" id="pgHastaL" hidden>Repetir hasta<input id="pgHasta" type="date" class="inp"></label>`}
+  <label class="f full">Objetivo o nota de la visita<textarea id="pgO" class="inp" rows="2" placeholder="Ej: verificar cierre de compromisos del acta anterior, reunión con el administrador del edificio">${esc(d.obj||'')}</textarea></label>
+  <label class="f full" id="pgMotL" hidden>Motivo del cambio (lo verá el supervisor)<textarea id="pgMot" class="inp" rows="2" placeholder="Ej: el cliente pidió adelantar la visita por auditoría interna"></textarea></label>
+  <div class="full pgw" id="pgW"></div>
+  ${p&&p.log&&p.log.length?`<div class="full"><div class="sm" style="font-weight:600;margin-bottom:4px">Historial</div><div class="pglog">${[...p.log].reverse().map(l=>`<div>${fDT(l.at)} · ${esc(l.byN||'')} · ${esc(l.ev)}</div>`).join('')}</div></div>`:''}
+ </div>`;
+ const canDel=p&&(Cl.admin?(prgMine(p)||p.by==Cl.meId):p.by==Cl.meId);
+ $('#mF').innerHTML=`${p?`<button class="btn s" id="pgCalB"><i class="fa-solid fa-download"></i>.ics</button><a class="btn s" id="pgGcal" target="_blank" rel="noopener" style="text-decoration:none">Google Calendar</a>`:''}${canDel?`<button class="btn d s" id="pgDel"><i class="fa-solid fa-trash-can"></i>Eliminar</button>`:''}<span style="flex:1"></span>${p&&p.est=='programada'&&(prgMine(p)||Cl.admin)?`<button class="btn s" id="pgStart"><i class="fa-solid fa-clipboard-check"></i>Iniciar inspección</button>`:''}<button class="btn" data-close>Cancelar</button><button class="btn p" id="pgOk"><i class="fa-solid fa-floppy-disk"></i>Guardar</button>`;
+ $('#mdl').hidden=false;
+ const upd=()=>{const sid=$('#pgS').value;const ce=$('#pgC').value;if(sid!=d._s){$('#pgC').innerHTML=prgCenOpts(sid,ce);d._s=sid}
+  $('#pgMotL').hidden=!(p&&notifies());const rep=$('#pgRep');if(rep)$('#pgHastaL').hidden=rep.value=='0';
+  const f=$('#pgF').value,h=$('#pgH').value,du=+$('#pgD').value,a0=toMin(h),a1=a0+du;
+  const cf=PRG.filter(x=>x.id!=d.id&&x.sup==sid&&x.fec==f&&x.est!='cancelada'&&toMin(x.hor)<a1&&toMin(x.hor)+(+x.dur||60)>a0);
+  const w=[];if(cf.length)w.push(`<div class="al w"><i class="fa-solid fa-triangle-exclamation"></i><span>Choca con: ${cf.map(x=>esc(x.hor+' '+x.ins)).join(', ')}.</span></div>`);
+  const dw=f?new Date(f+'T12:00').getDay():1;if(dw==0||dw==6)w.push(`<div class="al i"><i class="fa-solid fa-circle-info"></i><span>La fecha cae en fin de semana.</span></div>`);
+  if(f&&f<today()&&(!p||p.est=='programada'))w.push(`<div class="al i"><i class="fa-solid fa-circle-info"></i><span>La fecha ya pasó.</span></div>`);
+  const k=K.find(x=>x.id==$('#pgC').value);if(k&&k.sup&&k.sup!=sid)w.push(`<div class="al i"><i class="fa-solid fa-circle-info"></i><span>Este centro está asignado a ${esc((supById(k.sup)||{}).n||'otro supervisor')}.</span></div>`);
+  $('#pgW').innerHTML=w.join('')};
+ d._s=d.sup;['#pgS','#pgC','#pgF','#pgH','#pgD','#pgRep'].forEach(s=>{const e=$(s);if(e)e.onchange=upd});upd();
+ if(p){$('#pgCalB').onclick=()=>prgICS([p],`Visita_${p.fec}_${(p.cod||p.ins).replace(/\W+/g,'_')}.ics`);$('#pgGcal').href=prgGcal(p)}
+ if(canDel)$('#pgDel').onclick=()=>ask('Eliminar visita',`Se eliminará la visita a ${p.ins} del ${fD(p.fec)}. Si solo cambió la fecha, mejor reprográmela.`,()=>{del('pv',p.id);$('#mdl').hidden=true;refreshAll();toast('Visita eliminada')},'Eliminar',true);
+ if($('#pgStart'))$('#pgStart').onclick=()=>{$('#mdl').hidden=true;prgStart(p)};
+ $('#pgOk').onclick=()=>prgSave(p,d)}
+function prgSave(p,d){if(!ready())return;const sid=$('#pgS').value,kid=$('#pgC').value,fec=$('#pgF').value,hor=$('#pgH').value;
+ if(!sid){toast('Elija el supervisor');return}if(!kid){$('#pgC').classList.add('bad');toast('Elija el centro de trabajo');return}if(!fec||!hor){toast('Indique fecha y hora');return}
+ const k=K.find(x=>x.id==kid),s=supById(sid),m=mySup(),now=new Date().toISOString(),est=p?$('#pgE').value:'programada';
+ const n={...(p||{}),id:d.id,sup:sid,supN:s?s.n:'',k:kid,cod:k.cod||'',cli:k.cli,ins:k.ins,fec,hor,dur:+$('#pgD').value,tip:$('#pgT').value,rem:+$('#pgR').value,obj:$('#pgO').value.trim(),est,upd:now};delete n._s;
+ const L={sup:'Supervisor',k:'Centro',fec:'Fecha',hor:'Hora',dur:'Duración',tip:'Tipo',est:'Estado',obj:'Objetivo'};
+ const ch=p?Object.keys(L).filter(x=>String(p[x]??'')!=String(n[x]??'')).map(x=>{const v=(o,f)=>f=='sup'?((supById(o.sup)||{}).n||o.supN||'—'):f=='k'?o.ins:f=='fec'?fD(o.fec):f=='est'?PEN[o.est]:f=='dur'?o.dur+' min':(o[f]||'—');return`${L[x]}: ${v(p,x)} → ${v(n,x)}`}):[];
+ if(p&&!ch.length&&+p.rem==n.rem){$('#mdl').hidden=true;return}
+ const notif=Cl.admin&&!(m&&sid==m.id),mot=($('#pgMot')&&$('#pgMot').value.trim())||'';
+ if(p&&notif&&ch.length&&!mot){$('#pgMot').classList.add('bad');$('#pgMot').focus();toast('Indique el motivo del cambio: se mostrará al supervisor');return}
+ if(est=='cancelada'&&p&&p.est!='cancelada'&&!mot&&!n.obj.toLowerCase().includes('cancel')&&!notif){n.obj=(n.obj?n.obj+' · ':'')+'Cancelada el '+fD(today())}
+ n.log=[...((p&&p.log)||[]),{at:now,by:Cl.meId||'',byN:Cl.me||'',ev:p?(ch.length?'Modificada: '+ch.join('; '):'Recordatorio actualizado'):'Creada'+(notif?' por el administrador':'')}].slice(-30);
+ if(!p){n.by=Cl.meId||'local';n.byN=Cl.me||'';n.cre=now}
+ if(notif&&(!p||ch.length))n.adm={by:Cl.meId||'',byN:Cl.me||'Administrador',at:now,det:p?ch.join(' · '):`Nueva visita: ${fD(fec)} ${hor} · ${n.tip}`,mot,nuevo:!p,visto:false};
+ if(!notif&&p&&p.adm&&!p.adm.visto&&prgMine(p))n.adm={...p.adm,visto:true,vat:now};
+ const list=[n];
+ if(!p){const rp=$('#pgRep').value,hasta=$('#pgHasta').value;if(rp!='0'){if(!hasta||hasta<=fec){toast('Indique hasta cuándo se repite');return}
+  let f=fec,i=0;while(i<60){const dt=new Date(f+'T12:00');if(rp=='m')dt.setMonth(dt.getMonth()+1);else dt.setDate(dt.getDate()+(+rp));f=dt.toISOString().slice(0,10);if(f>hasta)break;list.push({...n,id:uid(),fec:f,serie:n.id,log:[{at:now,by:Cl.meId||'',byN:Cl.me||'',ev:'Creada (serie)'}]});i++}
+  n.serie=n.id}}
+ list.forEach(x=>put('pv',x));$('#mdl').hidden=true;refreshAll();
+ toast(list.length>1?`${list.length} visitas agendadas`:p?'Visita actualizada':'Visita agendada');
+ if(notif&&(!p||ch.length)&&s)setTimeout(()=>prgAviso(s,n,p?ch:null,mot),250)}
+function prgAviso(s,n,ch,mot){const txt=`Hola ${s.n}:\n\n${Cl.me||'El administrador'} (Administrador) ${ch?'modificó':'agendó'} su visita a ${n.ins} (${n.cli}) para el ${fD(n.fec)} a las ${n.hor}.\n${ch?'Cambios: '+ch.join('; ')+'\n':''}${mot?'Motivo: '+mot+'\n':''}\nRevise su Programa de visitas en la app Inspección de Servicio.`;
+ ask('Aviso al supervisor',`El cambio quedó registrado y ${s.n} lo verá destacado al abrir la app (Inicio y Programa).${s.mail?' ¿Desea enviarle además un correo?':' No tiene correo registrado: puede copiar el aviso para enviarlo por WhatsApp.'}`,()=>{if(s.mail){const a=document.createElement('a');a.href='mailto:'+encodeURIComponent(s.mail)+'?subject='+encodeURIComponent('Cambio en su programa de visitas · '+n.ins)+'&body='+encodeURIComponent(txt);a.target='_blank';document.body.appendChild(a);a.click();a.remove()}else copyTxt(txt,'Aviso copiado')},s.mail?'Enviar correo':'Copiar aviso')}
+function prgAck(id){if(id=='__all'){if(!ready())return;const now=new Date().toISOString();prgUnseen().forEach(p=>put('pv',{...p,adm:{...p.adm,visto:true,vat:now},log:[...(p.log||[]),{at:now,by:Cl.meId||'',byN:Cl.me||'',ev:'Cambio del administrador revisado'}].slice(-30)}));refreshAll();toast('Cambios marcados como revisados');return}const p=PRG.find(x=>x.id==id);if(!p||!ready())return;put('pv',{...p,adm:{...p.adm,visto:true,vat:new Date().toISOString()},log:[...(p.log||[]),{at:new Date().toISOString(),by:Cl.meId||'',byN:Cl.me||'',ev:'Cambio del administrador revisado'}].slice(-30)});refreshAll();toast('Marcado como revisado')}
+function prgStart(p){const go2=()=>{const c=blank(),k=K.find(x=>x.id==p.k),s=supById(p.sup);c.cli=p.cli;c.ins=p.ins;c.tip=p.tip||c.tip;c.prog=p.id;if(k){c.con=k.con||'';c.cca=k.car||'';if(k.dot!==undefined&&k.dot!=='')c.pro=k.dot}if(s){c.sup=s.n;c.rut=s.r||''}loadForm(c);dirty=true;go('form');toast('Acta iniciada desde el programa: al finalizarla, la visita queda como realizada')};
+ if(CUR&&dirty)ask('Inspección en curso','Tiene una inspección con cambios sin guardar. ¿Desea descartarla y comenzar la visita programada?',go2,'Descartar y comenzar',true);else go2()}
+function prgLink(rec){const p=PRG.find(x=>x.id==rec.prog)||PRG.find(x=>x.est=='programada'&&cenK(x.cli,x.ins)==cenK(rec.cli,rec.ins)&&x.fec==rec.fec);
+ if(!p||p.est=='realizada')return;put('pv',{...p,est:'realizada',acta:rec.id,folio:rec.folio,real:rec.fec,upd:new Date().toISOString(),log:[...(p.log||[]),{at:new Date().toISOString(),by:Cl.meId||'',byN:Cl.me||'',ev:'Realizada con el acta '+rec.folio}].slice(-30)})}
+/* Calendario externo */
+const icsD=(f,h)=>f.replace(/-/g,'')+'T'+h.replace(':','')+'00';
+const icsE=s=>String(s||'').replace(/\\/g,'\\\\').replace(/[,;]/g,m=>'\\'+m).replace(/\n/g,'\\n');
+function prgICS(list,name){if(!list.length){toast('No hay visitas para exportar');return}
+ const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//GlobalClean//Inspeccion de Servicio//ES','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:Programa de visitas GlobalClean','X-WR-TIMEZONE:America/Santiago'];
+ list.forEach(p=>{L.push('BEGIN:VEVENT','UID:'+p.id+'@inspeccion-servicio','DTSTAMP:'+new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z','DTSTART;TZID=America/Santiago:'+icsD(p.fec,p.hor),'DTEND;TZID=America/Santiago:'+icsD(p.fec,addMin(p.hor,p.dur||60)),'SUMMARY:'+icsE('Visita: '+p.ins+' ('+p.cli+')'),'LOCATION:'+icsE(p.ins+', '+p.cli),'DESCRIPTION:'+icsE((p.tip||'')+(p.obj?'\n'+p.obj:'')+'\nSupervisor: '+(p.supN||'')+'\nPrograma de visitas · Inspección de Servicio'),'STATUS:'+(p.est=='cancelada'?'CANCELLED':'CONFIRMED'));
+  if(+p.rem>0)L.push('BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+icsE('Visita a '+p.ins),'TRIGGER:-PT'+(+p.rem)+'M','END:VALARM');L.push('END:VEVENT')});
+ L.push('END:VCALENDAR');save(name,L.join('\r\n'),'text/calendar').then(ok=>ok&&toast('Abra el archivo en el celular para agregar las visitas a su calendario con recordatorio'))}
+function prgGcal(p){const z=s=>s.replace(/-/g,'').replace(':','');return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent('Visita: '+p.ins+' ('+p.cli+')')+'&dates='+z(p.fec)+'T'+z(p.hor)+'00/'+z(p.fec)+'T'+z(addMin(p.hor,p.dur||60))+'00&ctz=America/Santiago&location='+encodeURIComponent(p.ins+', '+p.cli)+'&details='+encodeURIComponent((p.tip||'')+(p.obj?'\n'+p.obj:''))}
+/* Programa sugerido */
+function prgGen(){const m=mySup();if(!Cl.admin&&!m){toast('Primero vincule su cuenta a su perfil de supervisor');return}
+ const sid0=Cl.admin?(PGS.sup||(m?m.id:'')):m.id;
+ $('#mT').textContent='Programa sugerido';$('#mS').textContent='Distribuye las visitas del mes según la frecuencia y la prioridad de cada centro';
+ $('#mB').innerHTML=`<div class="pgform">
+  <label class="f">Supervisor<select id="gS" class="inp"${Cl.admin?'':' disabled'}>${[...S].sort((a,b)=>a.n.localeCompare(b.n)).map(s=>`<option value="${s.id}"${s.id==sid0?' selected':''}>${esc(s.n)} (${K.filter(k=>k.sup==s.id).length} centros)</option>`).join('')}</select></label>
+  <label class="f">Mes<input id="gM" type="month" class="inp" value="${PGS.m}"></label>
+  <label class="f">Máximo de visitas por día<select id="gX" class="inp">${[1,2,3,4,5,6].map(n=>`<option${n==3?' selected':''}>${n}</option>`).join('')}</select></label>
+  <label class="f">Primera visita del día<input id="gH" type="time" class="inp" value="09:00"></label>
+  <label class="f">Tiempo entre visitas<select id="gI" class="inp"><option value="90">1 h 30 min</option><option value="120" selected>2 horas</option><option value="150">2 h 30 min</option><option value="180">3 horas</option></select></label>
+  <label class="f">Días de visita<select id="gW" class="inp"><option value="5">Lunes a viernes</option><option value="6">Lunes a sábado</option></select></label>
+  <div class="full sm mu">Cada centro recibe 1 visita cada ${FREQ()} días (frecuencia en Configuración). Primero se agendan los centros con más días sin visita, menor cumplimiento o compromisos vencidos. No se duplican visitas ya programadas en el mes.</div>
+  <div class="full" id="gP"></div></div>`;
+ $('#mF').innerHTML=`<button class="btn" data-close>Cancelar</button><button class="btn p" id="gOk" disabled><i class="fa-solid fa-calendar-plus"></i>Agendar</button>`;$('#mdl').hidden=false;
+ let plan=[];
+ const calc=()=>{const sid=$('#gS').value,mes=$('#gM').value,mx=+$('#gX').value,h0=$('#gH').value||'09:00',iv=+$('#gI').value,wd=+$('#gW').value;if(!sid||!mes){$('#gP').innerHTML='';return}
+  const cens=K.filter(k=>k.sup==sid);if(!cens.length){$('#gP').innerHTML='<div class="al w"><i class="fa-solid fa-triangle-exclamation"></i><span>Este supervisor no tiene centros asignados. Asígnelos en Configuración o con la planilla de centros.</span></div>';$('#gOk').disabled=true;plan=[];return}
+  const [y,mo]=mes.split('-').map(Number),dim=new Date(y,mo,0).getDate(),hoy=today(),days=[];
+  for(let d=1;d<=dim;d++){const f=`${y}-${pad(mo)}-${pad(d)}`,w=new Date(f+'T12:00').getDay();if(f<hoy)continue;if(w==0||(w==6&&wd<6))continue;days.push(f)}
+  if(!days.length){$('#gP').innerHTML='<div class="al w"><i class="fa-solid fa-triangle-exclamation"></i><span>No quedan días hábiles en ese mes.</span></div>';$('#gOk').disabled=true;plan=[];return}
+  const ex=PRG.filter(p=>p.sup==sid&&(p.fec||'').slice(0,7)==mes&&p.est!='cancelada'),load={};ex.forEach(p=>load[p.fec]=(load[p.fec]||0)+1);
+  const lv=lastVisit(),sc={},late={};V.filter(v=>v.est=='cerrada'&&v.score!=null).forEach(v=>{const k=cenK(v.cli,v.ins);(sc[k]=sc[k]||[]).push(v.score)});allComp().filter(isLate).forEach(c=>{const k=cenK(c.v.cli,c.v.ins);late[k]=(late[k]||0)+1});
+  const per=Math.max(1,Math.round(dim/FREQ()));
+  const pri=cens.map(k=>{const ck=cenK(k.cli,k.ins),u=lv[ck],dias=u?Math.round((new Date(hoy)-new Date(u))/864e5):999,a=avgOf(sc[ck]||[]),lt=late[ck]||0,need=Math.max(0,per-ex.filter(p=>p.k==k.id).length);
+   const why=[];if(!u)why.push('sin visitas registradas');else if(dias>FREQ())why.push(`${dias} días sin visita`);if(a!=null&&a<90)why.push(`cumplimiento ${a}%`);if(lt)why.push(`${lt} compromiso${lt>1?'s':''} vencido${lt>1?'s':''}`);
+   return{k,need,score:Math.min(dias,400)+(a!=null?(100-a)*2:20)+lt*30,why:why.join(' · ')||'visita periódica'}}).filter(x=>x.need>0).sort((a,b)=>b.score-a.score);
+  plan=[];const used={...load};
+  pri.forEach((x,ri)=>{for(let i=0;i<x.need;i++){let tgt=Math.min(days.length-1,Math.floor((i+(ri%3+.5)/3)*days.length/x.need));let pick=null;
+    for(let s=0;s<days.length&&!pick;s++){for(const c of [tgt+s,tgt-s]){if(c>=0&&c<days.length&&(used[days[c]]||0)<mx&&!plan.some(q=>q.k.id==x.k.id&&q.fec==days[c])){pick=days[c];break}}}
+    if(!pick)break;const n=used[pick]||0;used[pick]=n+1;plan.push({k:x.k,fec:pick,hor:addMin(h0,n*iv),why:x.why})}});
+  plan.sort((a,b)=>(a.fec+a.hor).localeCompare(b.fec+b.hor));
+  const cap=days.length*mx-Object.values(load).reduce((a,b)=>a+b,0),falt=pri.reduce((a,x)=>a+x.need,0)-plan.length;
+  $('#gP').innerHTML=(plan.length?`<div class="al i"><i class="fa-solid fa-circle-info"></i><span>${plan.length} visita${plan.length>1?'s':''} sugerida${plan.length>1?'s':''} para ${cens.length} centro${cens.length>1?'s':''}${ex.length?` (ya hay ${ex.length} programada${ex.length>1?'s':''} en el mes)`:''}. Puede editar o eliminar cada una después.${falt>0?` <b>${falt} no caben</b> con ${mx} visitas por día: aumente el máximo.`:''}</span></div><div class="tw" style="max-height:320px;overflow:auto"><table><thead><tr><th>Fecha</th><th>Hora</th><th>Centro</th><th>Prioridad</th></tr></thead><tbody>${plan.map(q=>`<tr><td class="num sm">${new Date(q.fec+'T12:00').toLocaleDateString('es-CL',{weekday:'short',day:'2-digit',month:'2-digit'})}</td><td class="num sm">${q.hor}</td><td><b>${esc(q.k.ins)}</b><div class="sm mu">${esc(q.k.cli)}</div></td><td class="sm">${esc(q.why)}</td></tr>`).join('')}</tbody></table></div>`:`<div class="al i"><i class="fa-solid fa-circle-check"></i><span>Todos los centros asignados ya tienen sus visitas del mes programadas${cap<=0?' o no quedan cupos':''}.</span></div>`);
+  $('#gOk').disabled=!plan.length;$('#gOk').innerHTML=`<i class="fa-solid fa-calendar-plus"></i>Agendar ${plan.length||''} visita${plan.length==1?'':'s'}`};
+ ['#gS','#gM','#gX','#gH','#gI','#gW'].forEach(s=>$(s).onchange=calc);calc();
+ $('#gOk').onclick=()=>{if(!plan.length||!ready())return;const sid=$('#gS').value,s=supById(sid),m=mySup(),now=new Date().toISOString(),notif=Cl.admin&&!(m&&sid==m.id);
+  plan.forEach(q=>put('pv',{id:uid(),sup:sid,supN:s?s.n:'',k:q.k.id,cod:q.k.cod||'',cli:q.k.cli,ins:q.k.ins,fec:q.fec,hor:q.hor,dur:60,tip:TIPOS[0],rem:60,obj:'Programa sugerido: '+q.why,est:'programada',by:Cl.meId||'local',byN:Cl.me||'',cre:now,upd:now,gen:true,log:[{at:now,by:Cl.meId||'',byN:Cl.me||'',ev:'Creada por programa sugerido'+(notif?' (administrador)':'')}],...(notif?{adm:{by:Cl.meId||'',byN:Cl.me||'Administrador',at:now,det:`Visita agendada en el programa del mes: ${fD(q.fec)} ${q.hor}`,nuevo:true,visto:false}}:{})}));
+  PGS.m=$('#gM').value;if(Cl.admin)PGS.sup=sid;$('#mdl').hidden=true;refreshAll();toast(`${plan.length} visitas agendadas`);if(notif&&s)setTimeout(()=>prgAviso(s,{ins:plan.length+' centros',cli:'programa del mes',fec:plan[0].fec,hor:plan[0].hor},null,''),250)}}
+/* Eventos del módulo */
+$('#pgNew').onclick=()=>prgEdit(null);$('#pgGen').onclick=prgGen;
+$('#pgSup').onchange=e=>{PGS.sup=e.target.value;prgRender()};
+$('#pgMes').onchange=e=>{if(e.target.value){PGS.m=e.target.value;prgRender()}};
+const pgShift=n=>{const[y,m]=PGS.m.split('-').map(Number),d=new Date(y,m-1+n,1);PGS.m=d.getFullYear()+'-'+pad(d.getMonth()+1);prgRender()};
+$('#pgPrev').onclick=()=>pgShift(-1);$('#pgNext').onclick=()=>pgShift(1);$('#pgHoy').onclick=()=>{PGS.m=today().slice(0,7);prgRender()};
+$('#pgIcs').onclick=()=>{const sid=prgScope();const L=PRG.filter(p=>(!sid||p.sup==sid)&&p.est=='programada'&&p.fec>=today()).sort((a,b)=>(a.fec+a.hor).localeCompare(b.fec+b.hor));prgICS(L,`Programa_visitas_${today()}.ics`)};
+$('#pgNotif').onclick=async()=>{try{if(!('Notification' in window)){toast('Este navegador no permite avisos. Use la exportación al calendario.');return}const r=await Notification.requestPermission();toast(r=='granted'?'Avisos activados mientras la app esté abierta':'El navegador no permitió los avisos. Use la exportación al calendario (.ics), que avisa aunque la app esté cerrada.');if(r=='granted')prgNotify()}catch(e){toast('Avisos no disponibles aquí. Use la exportación al calendario (.ics).')}};
+$('#v-prog').addEventListener('click',e=>{const a=e.target.closest('[data-pgack]');if(a){prgAck(a.dataset.pgack);return}
+ const ed=e.target.closest('[data-pged]');if(ed){e.stopPropagation();prgEdit(ed.dataset.pged);return}
+ const k=e.target.closest('[data-pgk]');if(k){prgEdit(null,{k:k.dataset.pgk});return}
+ const dy=e.target.closest('[data-pgday]');if(dy&&(Cl.admin||mySup()))prgEdit(null,{fec:dy.dataset.pgday})});
+/* Configuración: asignación de centros y edición de supervisores */
+$('#v-cfg').addEventListener('change',e=>{const s=e.target.closest('[data-ksup]');if(!s||!Cl.admin||!ready())return;const k=K.find(x=>x.id==s.dataset.ksup);if(!k)return;put('k',{...k,sup:s.value,upd:new Date().toISOString()});toast(s.value?'Centro asignado a '+((supById(s.value)||{}).n||''):'Centro sin supervisor asignado')});
+$('#v-cfg').addEventListener('click',e=>{const b=e.target.closest('[data-es]');if(!b||!Cl.admin)return;const s=supById(b.dataset.es);if(!s)return;
+ $('#mT').textContent='Editar supervisor';$('#mS').textContent=s.n;
+ $('#mB').innerHTML=`<div class="pgform"><label class="f">Nombre<input id="seN" class="inp" value="${esc(s.n)}"></label><label class="f">RUT<input id="seR" class="inp" value="${esc(s.r||'')}"></label><label class="f full">Correo (identifica al supervisor al iniciar sesión y en la planilla)<input id="seM" class="inp" type="email" value="${esc(s.mail||'')}"></label>
+  <div class="full sm">${s.uid?`Cuenta vinculada${s.uname?' ('+esc(s.uname)+')':''} el ${fDT(s.ulink)}. <button class="btn s" id="seU">Desvincular cuenta</button>`:'<span class="mu">Sin cuenta vinculada: el supervisor la vincula al abrir el Programa, o se reconoce por su correo o nombre.</span>'}</div>
+  <div class="full sm mu">${K.filter(k=>k.sup==s.id).length} centros asignados · ${PRG.filter(p=>p.sup==s.id&&p.est=='programada'&&p.fec>=today()).length} visitas pendientes.</div></div>`;
+ $('#mF').innerHTML=`<button class="btn" data-close>Cancelar</button><button class="btn p" id="seOk"><i class="fa-solid fa-floppy-disk"></i>Guardar</button>`;$('#mdl').hidden=false;
+ if($('#seU'))$('#seU').onclick=()=>{const x={...s};delete x.uid;delete x.ulink;delete x.uname;put('s',x);$('#mdl').hidden=true;cfgRender();toast('Cuenta desvinculada')};
+ $('#seOk').onclick=()=>{const n=$('#seN').value.trim(),r=$('#seR').value.trim(),ml=$('#seM').value.trim().toLowerCase();if(!n){$('#seN').classList.add('bad');return}if(r&&!rutOk(r)){$('#seR').classList.add('bad');toast('RUT no válido');return}if(!ready())return;
+  put('s',{...s,n,r:r?rutFmt(r):'',mail:ml});PRG.filter(p=>p.sup==s.id&&p.supN!=n).forEach(p=>put('pv',{...p,supN:n}));$('#mdl').hidden=true;cfgRender();lists();toast('Supervisor actualizado')}});
+
+async function copyTxt(s,ok){try{await navigator.clipboard.writeText(s);toast(ok||'Copiado')}catch(e){const a=document.createElement('textarea');a.value=s;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();let r=false;try{r=document.execCommand('copy')}catch(x){}a.remove();toast(r?(ok||'Copiado'):'No se pudo copiar: selecciónelo y cópielo manualmente')}}
 /* ---------- Arranque ---------- */
 addEventListener('beforeunload',e=>{if(dirty&&CUR){readForm();lsSet(LK.d,{t:new Date().toISOString(),c:CUR})}});
 brandApply();homeRender();initStore();
