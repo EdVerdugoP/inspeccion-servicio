@@ -1,9 +1,16 @@
 rules_version = '2';
-// Reglas de seguridad de Firestore · Inspección de Servicio (GlobalClean)
-// Publicar en: Consola de Firebase → Firestore Database → Reglas → pegar todo este texto → Publicar.
+// Reglas de seguridad de Firestore · Proyecto apps-gc-78118 (GlobalClean)
+// IMPORTANTE: el proyecto tiene UN SOLO conjunto de reglas para todas las apps.
+// Este archivo contiene las reglas de Inspección de Servicio (IS-Web, con Programa de visitas) + Buzón SST (buzon_*) + AST GlobalClean (ast_*).
+// La misma copia está en los repositorios buzon-sst y ast-globalclean: si cambia una, actualice ambas.
+// Publicar en: Consola de Firebase → Firestore Database → Reglas → borrar todo, pegar este texto → Publicar.
+// Si más adelante se publica otra app en el mismo proyecto, sus reglas se agregan a este mismo archivo.
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // =====================================================================
+    // INSPECCIÓN DE SERVICIO (IS-Web) · incluye Programa de visitas (colección programa) y vínculo de cuenta del supervisor
+    // =====================================================================
     // Administradores iniciales (deben coincidir con GC_ADMIN_EMAILS de firebase-config.js)
     function ADMIN_EMAILS() { return ['ed.verdugo.penaloza@gmail.com']; }
 
@@ -62,6 +69,145 @@ service cloud.firestore {
     match /accesos/{uid} {
       allow read: if isAdmin();
       allow write: if (isUser() && uid == request.auth.uid) || isAdmin();
+    }
+
+    // =====================================================================
+    // BUZÓN SST (BZ-Web) · colecciones con prefijo buzon_
+    // Trabajadores: sesión anónima desde el QR; solo pueden CREAR reportes/AST (nunca leer).
+    // Panel: correos autorizados en buzon_usuarios (admin, gestor, lectura).
+    // =====================================================================
+    function bzListed() { return signedIn() && exists(/databases/$(database)/documents/buzon_usuarios/$(email())); }
+    function bzRol() { return get(/databases/$(database)/documents/buzon_usuarios/$(email())).data.rol; }
+    function bzUser() { return signedIn() && (email() in ADMIN_EMAILS() || bzListed()); }
+    function bzAdmin() { return signedIn() && (email() in ADMIN_EMAILS() || (bzListed() && bzRol() == 'admin')); }
+    function bzGestor() { return bzAdmin() || (bzListed() && bzRol() == 'gestor'); }
+    function anyAuth() { return request.auth != null; }
+    function txt(v, mx) { return v is string && v.size() <= mx; }
+    function bzFolio(id, pref) {
+      let d = request.resource.data;
+      return d.folio == id && d.serie is string && d.serie.matches('^' + pref + '-[0-9]{4}$')
+        && id.matches('^' + d.serie + '-[0-9]{5}$')
+        && getAfter(/databases/$(database)/documents/buzon_contador/$(d.serie)).data.ultimo == id
+        && d.creadoPor == request.auth.uid && d.privacidad == true
+        && txt(d.nombre, 120) && d.nombre.size() >= 3 && txt(d.rut, 12) && d.rut.size() >= 8
+        && txt(d.codigo, 40) && txt(d.centro, 200)
+        && (!('fotos' in d) || (d.fotos is list && d.fotos.size() <= 4));
+    }
+
+    // Funciones de AST-Web (se usan también en buzon_ast; detalle en la sección AST GLOBALCLEAN)
+    function astListed() { return signedIn() && exists(/databases/$(database)/documents/ast_usuarios/$(email())); }
+    function astRol() { return get(/databases/$(database)/documents/ast_usuarios/$(email())).data.rol; }
+    function astAdmin() { return signedIn() && (email() in ADMIN_EMAILS() || (astListed() && astRol() == 'admin')); }
+    function astWriter() { return astAdmin() || (astListed() && astRol() == 'supervisor'); }
+    function astUser() { return astAdmin() || astListed() || bzUser(); }
+    function propia() { return anyAuth() && resource.data.creadoPor == request.auth.uid; }
+    // Resumen de una AST finalizada de AST-Web en el módulo AST / ART del Buzón (mismo folio, sin RUT ni firmas)
+    function astDigital(folio) {
+      let d = request.resource.data;
+      let r = get(/databases/$(database)/documents/ast_registros/$(d.astId));
+      return folio.matches('^AST-[0-9]{8}-[A-Z0-9]{5}$') && d.folio == folio && d.origen == 'ast-web' && d.tipoDoc == 'AST digital'
+        && d.privacidad == true && d.rut == '' && txt(d.astId, 60) && txt(d.creado, 40)
+        && r.data.folio == folio && r.data.estado in ['Autorizada', 'Detenida']
+        && (astWriter() || r.data.creadoPor == request.auth.uid)
+        && d.keys().hasOnly(['folio', 'astId', 'tipoDoc', 'fecha', 'creado', 'fechaAst', 'horaAst', 'codigo', 'centro', 'mandante',
+          'lugar', 'area', 'tarea', 'supervisor', 'participantes', 'ejecutores', 'validador', 'nombre', 'rut', 'cargo', 'empresa',
+          'resultado', 'correcciones', 'inmediato', 'detalle', 'observacion', 'riesgos', 'itemsNo', 'medidas', 'epp', 'url', 'fotos',
+          'privacidad', 'versionForm', 'origen', 'creadoPor', 'rev'])
+        && d.fotos is list && d.fotos.size() == 0;
+    }
+
+    match /buzon_usuarios/{mail} {
+      allow read: if signedIn() && (mail == email() || bzAdmin());
+      allow write: if bzAdmin();
+    }
+    match /buzon_config/{id}  { allow read: if bzUser(); allow write: if bzAdmin(); }
+    // Lista pública de centros (código, nombre, cliente) para el formulario QR
+    match /buzon_publico/{id} { allow read: if anyAuth(); allow write: if bzAdmin(); }
+
+    // Correlativo de folios por serie y año (BZ-2026, AST-2026): solo avanza de a 1 y junto con su reporte
+    match /buzon_contador/{serie} {
+      allow read: if anyAuth();
+      allow create: if anyAuth() && request.resource.data.keys().hasOnly(['n', 'ultimo']) && request.resource.data.n == 1
+        && (existsAfter(/databases/$(database)/documents/buzon_reportes/$(request.resource.data.ultimo))
+            || existsAfter(/databases/$(database)/documents/buzon_ast/$(request.resource.data.ultimo)));
+      allow update: if anyAuth() && request.resource.data.keys().hasOnly(['n', 'ultimo']) && request.resource.data.n == resource.data.n + 1
+        && (existsAfter(/databases/$(database)/documents/buzon_reportes/$(request.resource.data.ultimo))
+            || existsAfter(/databases/$(database)/documents/buzon_ast/$(request.resource.data.ultimo)));
+    }
+
+    // Reportes de condiciones inseguras
+    match /buzon_reportes/{folio} {
+      allow read: if bzUser();
+      allow create: if anyAuth() && bzFolio(folio, 'BZ') && request.resource.data.keys().hasOnly([
+          'folio', 'serie', 'num', 'fecha', 'codigo', 'centro', 'mandante', 'lugar', 'tipo', 'categoria', 'descripcion',
+          'inmediato', 'sugerencia', 'desde', 'afecta', 'supervisor', 'participar', 'medioResp', 'nombre', 'rut', 'cargo',
+          'empresa', 'telefono', 'correo', 'privacidad', 'versionForm', 'fotos', 'creadoPor', 'creado'])
+        && txt(request.resource.data.descripcion, 2000) && txt(request.resource.data.lugar, 200);
+      allow update: if bzGestor();
+      allow delete: if bzAdmin();
+    }
+
+    // AST / ART: en papel (foto del ejemplar, desde el QR del Buzón) y digitales (resumen que registra AST-Web, sin RUT ni firmas)
+    match /buzon_ast/{folio} {
+      allow read: if bzUser()
+        || (resource.data.origen == 'ast-web' && (astUser() || (anyAuth() && resource.data.creadoPor == request.auth.uid)));
+      allow create: if anyAuth() && astDigital(folio);
+      allow update: if resource.data.origen == 'ast-web' && anyAuth() && astDigital(folio)
+        && request.resource.data.creado == resource.data.creado
+        && request.resource.data.get('rev', null) == resource.data.get('rev', null);
+      allow create: if anyAuth() && bzFolio(folio, 'AST') && request.resource.data.keys().hasOnly([
+          'folio', 'serie', 'num', 'fecha', 'codigo', 'centro', 'mandante', 'fechaAst', 'tipoDoc', 'tarea', 'lugar',
+          'supervisor', 'participantes', 'observacion', 'nombre', 'rut', 'cargo', 'empresa', 'privacidad', 'versionForm',
+          'fotos', 'creadoPor', 'creado'])
+        && request.resource.data.fotos is list && request.resource.data.fotos.size() >= 1;
+      allow update: if bzGestor();
+      allow delete: if bzAdmin();
+    }
+
+    // Fotografías comprimidas (una por documento); solo se crean junto con su reporte o AST
+    match /buzon_fotos/{id} {
+      allow read: if bzUser();
+      allow create: if anyAuth() && request.resource.data.keys().hasOnly(['src', 'folio', 'n', 'creado'])
+        && request.resource.data.src is string && request.resource.data.src.size() < 900000
+        && id == request.resource.data.folio + '-' + string(request.resource.data.n)
+        && (existsAfter(/databases/$(database)/documents/buzon_reportes/$(request.resource.data.folio))
+            || existsAfter(/databases/$(database)/documents/buzon_ast/$(request.resource.data.folio)));
+      allow delete: if bzAdmin();
+    }
+
+    // Registro de accesos al panel
+    match /buzon_accesos/{uid} {
+      allow read: if bzAdmin();
+      allow write: if (bzUser() && uid == request.auth.uid) || bzAdmin();
+    }
+
+    // =====================================================================
+    // AST GLOBALCLEAN (AST-Web) · colecciones con prefijo ast_
+    // Supervisores y Prevención: correos en ast_usuarios (admin, supervisor, lectura); quienes están en buzon_usuarios leen.
+    // Trabajadores: sesión anónima desde el QR del centro; crean AST y solo leen las propias.
+    // =====================================================================
+    match /ast_usuarios/{mail} {
+      allow read: if signedIn() && (mail == email() || astAdmin());
+      allow write: if astAdmin();
+    }
+    // Centros y configuración: los lee también el trabajador desde el QR (no contienen datos personales)
+    match /ast_centros/{id} { allow read: if anyAuth(); allow write: if astAdmin(); }
+    match /ast_config/{id}  { allow read: if anyAuth(); allow write: if astAdmin(); }
+
+    match /ast_registros/{id} {
+      allow read: if astUser() || propia();
+      allow create: if anyAuth() && request.resource.data.id == id && request.resource.data.creadoPor == request.auth.uid
+        && (astWriter() || request.resource.data.origen == 'qr');
+      allow update: if astAdmin()
+        || (resource.data.estado == 'Borrador' && (astWriter() || propia()) && request.resource.data.creadoPor == resource.data.creadoPor)
+        || ((astWriter() || propia()) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['buzon', 'mod']));
+      allow delete: if astAdmin() || (resource.data.estado == 'Borrador' && propia());
+    }
+
+    // Registro de accesos
+    match /ast_accesos/{uid} {
+      allow read: if astAdmin();
+      allow write: if (astUser() && uid == request.auth.uid) || astAdmin();
     }
 
     // Todo lo demás, cerrado
