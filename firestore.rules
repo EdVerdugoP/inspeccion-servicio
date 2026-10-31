@@ -37,8 +37,22 @@ service cloud.firestore {
 
     // Maestros: centros, supervisores y configuración (marca, privacidad)
     match /clientes/{id}     { allow read: if isUser(); allow write: if isAdmin(); }
-    match /supervisores/{id} { allow read: if isUser(); allow write: if isAdmin(); }
+    // Supervisores: el administrador los gestiona; cada supervisor solo puede vincular su propia cuenta a su perfil
+    match /supervisores/{id} {
+      allow read: if isUser();
+      allow write: if isAdmin();
+      allow update: if isUser()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['uid', 'ulink', 'uname'])
+        && request.resource.data.uid == request.auth.uid
+        && (!('uid' in resource.data) || resource.data.uid == request.auth.uid);
+    }
     match /config/{id}       { allow read: if isUser(); allow write: if isAdmin(); }
+
+    // Programa de visitas: supervisores y administradores agendan y actualizan; borra el administrador o quien la creó
+    match /programa/{id} {
+      allow read, create, update: if isUser();
+      allow delete: if isAdmin() || (isUser() && resource.data.by == request.auth.uid);
+    }
 
     // Ley 21.719: solicitudes de derechos y brechas (gestión del administrador)
     match /solicitudes/{id} { allow create: if isUser(); allow read, update, delete: if isAdmin(); }
