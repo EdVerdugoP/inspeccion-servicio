@@ -90,3 +90,7 @@ Firestore Spark: 1 GiB de datos, 50.000 lecturas y 20.000 escrituras por día. P
 ## Funcionamiento sin señal
 
 La app guarda una copia local en el navegador. Si el supervisor pierde la señal con la app ya abierta, puede seguir trabajando: el indicador mostrará "Guardando…" y los cambios se envían solos cuando vuelve la conexión. Lo que no funciona sin señal es abrir o recargar la página desde cero.
+
+## Avisos por Telegram (Programa de visitas)
+
+`apps-script/AvisosServicio.gs` (proyecto «Avisos Buzón SST», cuenta de respaldos) envía por Telegram, con el bot @GCAvisosBot: a las 18:00 las visitas de mañana a cada supervisor/a y un resumen (mañana + atrasadas) al administrador; y cada 15 minutos los cambios del administrador al supervisor/a afectado. Usa el correo de la ficha del supervisor/a. Las personas se vinculan en el panel del Buzón › Configuración › Avisos por Telegram. Instalar con `instalarIs`; probar con `probarIs`.
